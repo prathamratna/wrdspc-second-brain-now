@@ -1,0 +1,43 @@
+// Add this to your globals.css or a custom CSS file
+
+/* Force LTR direction on editor content */
+[contenteditable="true"],
+[contenteditable="true"] * {
+  direction: ltr !important;
+  text-align: left !important;
+  unicode-bidi: isolate !important;
+}
+
+/* Target specific editor classes */
+.editor-content,
+.editor-content * {
+  direction: ltr !important;
+  text-align: left !important;
+  unicode-bidi: isolate !important;
+}
+
+/* Ensure LTR for placeholder text */
+.editor-placeholder {
+  direction: ltr !important;
+  text-align: left !important;
+}
+
+/* Prevent any RTL inheritance */
+html[dir="rtl"] .editor-content,
+html[dir="rtl"] .editor-content * {
+  direction: ltr !important;
+  text-align: left !important;
+}
+
+/* Force input caret to respect LTR */
+.force-ltr {
+  direction: ltr !important;
+  unicode-bidi: isolate-override !important;
+}
+
+/* Target any browser-injected RTL */
+*[style*="direction:rtl"],
+*[style*="direction: rtl"] {
+  direction: ltr !important;
+  text-align: left !important;
+}
