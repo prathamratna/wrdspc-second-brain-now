@@ -47,7 +47,7 @@ const Index = () => {
         <div className="max-w-3xl mx-auto text-center animate-slide-up">
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight mb-6">
             Your second brain,{" "}
-            <span className="text-primary">without the learning curve.</span>
+            <span className="text-primary">simplified.</span>
           </h1>
           
           <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
