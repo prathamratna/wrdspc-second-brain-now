@@ -300,7 +300,7 @@ const RichTextEditor = ({ initialContent = "", documentId = "default" }: RichTex
       <div
         ref={editorRef}
         contentEditable={true}
-        className="outline-none editor-content min-h-[70vh] py-4 bg-card px-6 rounded-md text-left"
+        className="outline-none editor-content min-h-[70vh] py-4 bg-background px-6 text-left"
         onInput={handleContentChange}
         onKeyDown={handleKeyDown}
         suppressContentEditableWarning={true}
@@ -308,15 +308,20 @@ const RichTextEditor = ({ initialContent = "", documentId = "default" }: RichTex
         dir="ltr"
         style={{
           direction: 'ltr',
-          textAlign: 'left'
+          unicodeBidi: 'plaintext',
+          textAlign: 'left',
+          whiteSpace: 'pre-wrap',
+          overflowWrap: 'break-word',
+          wordBreak: 'break-word',
         }}
       />
 
       {isEmpty && (
         <div
-          className="absolute top-10 left-6 pointer-events-none text-muted-foreground"
+          className="absolute top-4 left-6 pointer-events-none text-muted-foreground"
           style={{ zIndex: 5 }}
-        >Start writing here...
+        >
+          Start writing here...
         </div>
       )}
     </div>
