@@ -316,8 +316,7 @@ const RichTextEditor = ({ initialContent = "", documentId = "default" }: RichTex
         <div
           className="absolute top-10 left-6 pointer-events-none text-muted-foreground"
           style={{ zIndex: 5 }}
-        >
-          Start writing here...
+        >Start writing here...
         </div>
       )}
     </div>
