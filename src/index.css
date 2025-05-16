@@ -8,64 +8,64 @@
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 222 47% 11%;
+    --foreground: 0 0% 10%;
     
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 0 0% 10%;
     
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover-foreground: 0 0% 10%;
     
-    --primary: 262 83% 58%;
+    --primary: 0 0% 20%;
     --primary-foreground: 0 0% 100%;
     
-    --secondary: 214 32% 91%;
-    --secondary-foreground: 222 47% 11%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 10%;
     
-    --muted: 214 32% 91%;
-    --muted-foreground: 215 16% 47%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
     
-    --accent: 214 32% 91%;
-    --accent-foreground: 222 47% 11%;
+    --accent: 0 0% 96%;
+    --accent-foreground: 0 0% 10%;
     
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
     
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 262 83% 58%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 0 0% 20%;
     
     --radius: 0.5rem;
   }
 
   .dark {
-    --background: 222 47% 11%;
-    --foreground: 214 32% 91%;
+    --background: 0 0% 10%;
+    --foreground: 0 0% 90%;
     
-    --card: 222 47% 11%;
-    --card-foreground: 214 32% 91%;
+    --card: 0 0% 10%;
+    --card-foreground: 0 0% 90%;
     
-    --popover: 222 47% 11%;
-    --popover-foreground: 214 32% 91%;
+    --popover: 0 0% 10%;
+    --popover-foreground: 0 0% 90%;
     
-    --primary: 262 83% 58%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 0 0% 90%;
+    --primary-foreground: 0 0% 10%;
     
-    --secondary: 217 33% 17%;
-    --secondary-foreground: 214 32% 91%;
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 90%;
     
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 16% 65%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 65%;
     
-    --accent: 217 33% 17%;
-    --accent-foreground: 214 32% 91%;
+    --accent: 0 0% 15%;
+    --accent-foreground: 0 0% 90%;
     
     --destructive: 0 63% 31%;
-    --destructive-foreground: 214 32% 91%;
+    --destructive-foreground: 0 0% 90%;
     
-    --border: 217 33% 17%;
-    --input: 217 33% 17%;
-    --ring: 262 83% 58%;
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 0 0% 80%;
   }
 }
 
@@ -140,3 +140,4 @@
   background: radial-gradient(circle at 50% 50%, hsl(var(--primary)/0.15), transparent 60%),
               radial-gradient(circle at 85% 20%, hsl(var(--primary)/0.15), transparent 30%);
 }
+

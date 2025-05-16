@@ -12,6 +12,8 @@ const RichTextEditor = ({ initialContent = "", documentId = "default" }: RichTex
   const [content, setContent] = useState(initialContent);
   const [activeFormats, setActiveFormats] = useState<string[]>([]);
   const [showToolbar, setShowToolbar] = useState(false);
+  const [showSlashMenu, setShowSlashMenu] = useState(false);
+  const [slashPosition, setSlashPosition] = useState({ top: 0, left: 0 });
   const [toolbarPosition, setToolbarPosition] = useState({ top: 0, left: 0 });
   const editorRef = useRef<HTMLDivElement>(null);
   const toolbarRef = useRef<HTMLDivElement>(null);
@@ -46,6 +48,7 @@ const RichTextEditor = ({ initialContent = "", documentId = "default" }: RichTex
             left: newLeft
           });
           setShowToolbar(true);
+          setShowSlashMenu(false); // Hide slash menu when selecting text
         }
       } else {
         setShowToolbar(false);
@@ -151,6 +154,7 @@ const RichTextEditor = ({ initialContent = "", documentId = "default" }: RichTex
     }
     
     handleContentChange();
+    setShowSlashMenu(false);
   };
   
   const insertTable = () => {
@@ -180,38 +184,30 @@ const RichTextEditor = ({ initialContent = "", documentId = "default" }: RichTex
     document.execCommand('formatBlock', false, `<${headingType}>`);
   };
   
-  const handleSlashCommands = (event: React.KeyboardEvent) => {
-    if (event.key === '/' && editorRef.current) {
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key === '/') {
       const selection = window.getSelection();
       if (selection && selection.rangeCount > 0) {
         const range = selection.getRangeAt(0);
-        const cursorPosition = range.startOffset;
+        const rect = range.getBoundingClientRect();
         
-        if (cursorPosition === 0 || isStartOfLine()) {
-          // We'll implement this feature in a future update
-          toast("Slash commands coming soon!", {
-            position: "bottom-center"
-          });
-        }
+        setSlashPosition({
+          top: rect.bottom + 10,
+          left: rect.left
+        });
+        setShowSlashMenu(true);
+        setShowToolbar(false);
       }
+    } else if (event.key === 'Escape') {
+      setShowSlashMenu(false);
+    } else {
+      setShowSlashMenu(false);
     }
-  };
-  
-  const isStartOfLine = (): boolean => {
-    const selection = window.getSelection();
-    if (selection && selection.rangeCount > 0) {
-      const range = selection.getRangeAt(0);
-      const preCaretRange = range.cloneRange();
-      preCaretRange.selectNodeContents(range.startContainer);
-      preCaretRange.setEnd(range.startContainer, range.startOffset);
-      return preCaretRange.toString().trim().length === 0;
-    }
-    return false;
   };
 
   return (
     <div className="relative">
-      {/* Floating toolbar */}
+      {/* Floating toolbar for text selection */}
       {showToolbar && (
         <div 
           ref={toolbarRef}
@@ -230,16 +226,72 @@ const RichTextEditor = ({ initialContent = "", documentId = "default" }: RichTex
           />
         </div>
       )}
+      
+      {/* Slash command menu */}
+      {showSlashMenu && (
+        <div 
+          style={{
+            position: 'absolute',
+            top: `${slashPosition.top}px`,
+            left: `${slashPosition.left}px`,
+            zIndex: 50,
+          }}
+          className="bg-card border shadow-md rounded-md p-2 w-48 animate-fade-in"
+        >
+          <div className="text-sm font-medium mb-2 text-muted-foreground">Format</div>
+          <button 
+            onClick={() => handleFormatText('h1')} 
+            className="flex items-center w-full text-left px-2 py-1 hover:bg-accent rounded-sm"
+          >
+            <span className="text-lg font-bold">H1</span> 
+            <span className="ml-2 text-xs text-muted-foreground">Heading 1</span>
+          </button>
+          <button 
+            onClick={() => handleFormatText('h2')} 
+            className="flex items-center w-full text-left px-2 py-1 hover:bg-accent rounded-sm"
+          >
+            <span className="text-md font-bold">H2</span> 
+            <span className="ml-2 text-xs text-muted-foreground">Heading 2</span>
+          </button>
+          <button 
+            onClick={() => handleFormatText('h3')} 
+            className="flex items-center w-full text-left px-2 py-1 hover:bg-accent rounded-sm"
+          >
+            <span className="text-sm font-bold">H3</span> 
+            <span className="ml-2 text-xs text-muted-foreground">Heading 3</span>
+          </button>
+          <button 
+            onClick={() => handleFormatText('bullet')} 
+            className="flex items-center w-full text-left px-2 py-1 hover:bg-accent rounded-sm"
+          >
+            <span>• Bullet List</span>
+          </button>
+          <button 
+            onClick={() => handleFormatText('ordered')} 
+            className="flex items-center w-full text-left px-2 py-1 hover:bg-accent rounded-sm"
+          >
+            <span>1. Numbered List</span>
+          </button>
+          <button 
+            onClick={() => handleFormatText('table')} 
+            className="flex items-center w-full text-left px-2 py-1 hover:bg-accent rounded-sm"
+          >
+            <span>Table</span>
+          </button>
+        </div>
+      )}
     
       {/* Editor content */}
       <div 
         ref={editorRef}
         contentEditable={true}
-        className="outline-none editor-content min-h-[70vh] py-4"
+        className="outline-none editor-content min-h-[70vh] py-4 bg-card px-2 rounded-md"
         onInput={handleContentChange}
-        onKeyDown={handleSlashCommands}
+        onKeyDown={handleKeyDown}
         suppressContentEditableWarning={true}
         dangerouslySetInnerHTML={{ __html: content }}
+        dir="ltr" // Explicitly set text direction to left-to-right
+        style={{ unicodeBidi: 'bidi-override', direction: 'ltr' }} // Extra CSS to ensure correct text direction
       />
     </div>
   );
