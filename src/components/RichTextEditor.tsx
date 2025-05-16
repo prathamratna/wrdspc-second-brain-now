@@ -21,7 +21,6 @@ const RichTextEditor = ({ initialContent = "", documentId = "default" }: RichTex
   const saveTimeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
-    // Load content from localStorage on initialization
     const savedContent = localStorage.getItem(`wrdspc-content-${documentId}`);
     if (savedContent) {
       setContent(savedContent);
@@ -33,38 +32,35 @@ const RichTextEditor = ({ initialContent = "", documentId = "default" }: RichTex
   }, [documentId]);
 
   useEffect(() => {
-    // Check if content is empty
     const cleanContent = content.replace(/<[^>]*>/g, '').trim();
     setIsEmpty(cleanContent === '');
-    
+
     const handleSelectionChange = () => {
       const selection = window.getSelection();
-      
+
       if (selection && selection.rangeCount > 0 && !selection.isCollapsed) {
         const range = selection.getRangeAt(0);
         const rect = range.getBoundingClientRect();
-        
+
         if (rect.width > 0) {
-          // Position the toolbar above the selection
           const newTop = rect.top - 40;
           const newLeft = rect.left + rect.width / 2;
-          
+
           setToolbarPosition({
             top: newTop < 0 ? 5 : newTop,
             left: newLeft
           });
           setShowToolbar(true);
-          setShowSlashMenu(false); // Hide slash menu when selecting text
+          setShowSlashMenu(false);
         }
       } else {
         setShowToolbar(false);
       }
-      
-      // Detect active formats
+
       if (selection) {
         const formats: string[] = [];
         const parentElement = selection.anchorNode?.parentElement;
-        
+
         if (parentElement) {
           if (parentElement.tagName === 'B' || parentElement.style.fontWeight === 'bold') {
             formats.push('bold');
@@ -72,24 +68,22 @@ const RichTextEditor = ({ initialContent = "", documentId = "default" }: RichTex
           if (parentElement.tagName === 'I' || parentElement.style.fontStyle === 'italic') {
             formats.push('italic');
           }
-          
-          // Check list types
+
           const parentList = getParentOfType(parentElement, ['UL', 'OL']);
           if (parentList) {
             formats.push(parentList.tagName === 'UL' ? 'bullet' : 'ordered');
           }
-          
-          // Check headings
+
           const parentHeading = getParentOfType(parentElement, ['H1', 'H2', 'H3', 'H4', 'H5', 'H6']);
           if (parentHeading) {
             formats.push(parentHeading.tagName.toLowerCase());
           }
         }
-        
+
         setActiveFormats(formats);
       }
     };
-    
+
     document.addEventListener('selectionchange', handleSelectionChange);
     return () => document.removeEventListener('selectionchange', handleSelectionChange);
   }, [content]);
@@ -108,21 +102,19 @@ const RichTextEditor = ({ initialContent = "", documentId = "default" }: RichTex
     }
     return null;
   };
-  
+
   const handleContentChange = () => {
     if (editorRef.current) {
       const newContent = editorRef.current.innerHTML;
       setContent(newContent);
-      
-      // Check if empty
+
       const cleanContent = newContent.replace(/<[^>]*>/g, '').trim();
       setIsEmpty(cleanContent === '');
-      
-      // Debounce saving to localStorage
+
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current);
       }
-      
+
       saveTimeoutRef.current = window.setTimeout(() => {
         localStorage.setItem(`wrdspc-content-${documentId}`, newContent);
         toast("Changes saved", {
@@ -136,8 +128,7 @@ const RichTextEditor = ({ initialContent = "", documentId = "default" }: RichTex
 
   const handleFormatText = (format: string) => {
     if (!editorRef.current) return;
-    
-    // Handle different formatting actions
+
     switch (format) {
       case 'bold':
         document.execCommand('bold', false);
@@ -162,11 +153,11 @@ const RichTextEditor = ({ initialContent = "", documentId = "default" }: RichTex
       default:
         break;
     }
-    
+
     handleContentChange();
     setShowSlashMenu(false);
   };
-  
+
   const insertTable = () => {
     const table = `
       <table>
@@ -189,18 +180,26 @@ const RichTextEditor = ({ initialContent = "", documentId = "default" }: RichTex
     `;
     document.execCommand('insertHTML', false, table);
   };
-  
+
   const formatHeading = (headingType: string) => {
     document.execCommand('formatBlock', false, `<${headingType}>`);
   };
-  
+
   const handleKeyDown = (event: React.KeyboardEvent) => {
+    // Handle tab for indentation
+    if (event.key === 'Tab') {
+      event.preventDefault();
+      document.execCommand(event.shiftKey ? 'outdent' : 'indent');
+      handleContentChange();
+      return;
+    }
+
     if (event.key === '/') {
       const selection = window.getSelection();
       if (selection && selection.rangeCount > 0) {
         const range = selection.getRangeAt(0);
         const rect = range.getBoundingClientRect();
-        
+
         setSlashPosition({
           top: rect.bottom + 10,
           left: rect.left
@@ -222,9 +221,8 @@ const RichTextEditor = ({ initialContent = "", documentId = "default" }: RichTex
 
   return (
     <div className="relative">
-      {/* Floating toolbar for text selection */}
       {showToolbar && (
-        <div 
+        <div
           ref={toolbarRef}
           style={{
             position: 'fixed',
@@ -235,14 +233,13 @@ const RichTextEditor = ({ initialContent = "", documentId = "default" }: RichTex
           }}
           className="animate-in"
         >
-          <EditorToolbar 
+          <EditorToolbar
             onFormatText={handleFormatText}
             activeFormats={activeFormats}
           />
         </div>
       )}
-      
-      {/* Slash command menu */}
+
       {showSlashMenu && (
         <SlashCommandMenu
           position={slashPosition}
@@ -250,9 +247,8 @@ const RichTextEditor = ({ initialContent = "", documentId = "default" }: RichTex
           onClose={() => setShowSlashMenu(false)}
         />
       )}
-    
-      {/* Editor content */}
-      <div 
+
+      <div
         ref={editorRef}
         contentEditable={true}
         className="outline-none editor-content min-h-[70vh] py-4 bg-card px-6 rounded-md text-left"
@@ -260,17 +256,16 @@ const RichTextEditor = ({ initialContent = "", documentId = "default" }: RichTex
         onKeyDown={handleKeyDown}
         suppressContentEditableWarning={true}
         dangerouslySetInnerHTML={{ __html: content }}
-        dir="ltr" 
-        style={{ 
+        dir="ltr"
+        style={{
           position: 'relative',
-          direction: 'ltr', 
+          direction: 'ltr',
           textAlign: 'left'
         }}
       />
-      
-      {/* Placeholder text when editor is empty */}
+
       {isEmpty && (
-        <div 
+        <div
           className="absolute top-10 left-6 pointer-events-none text-muted-foreground"
           style={{ zIndex: 5 }}
         >
