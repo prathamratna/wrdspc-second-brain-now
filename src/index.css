@@ -6,6 +6,11 @@
 @tailwind utilities;
 
 @layer base {
+  html, body {
+    direction: ltr !important;
+    text-align: left !important;
+  }
+
   :root {
     --background: 0 0% 100%;
     --foreground: 0 0% 10%;
@@ -42,7 +47,7 @@
     --background: 0 0% 10%;
     --foreground: 0 0% 95%;
     
-    --card: 0 0% 10%;
+    --card: 0 0% 12%;
     --card-foreground: 0 0% 95%;
     
     --popover: 0 0% 10%;
@@ -159,3 +164,4 @@
   from { opacity: 0; transform: translateX(20px); }
   to { opacity: 1; transform: translateX(0); }
 }
+

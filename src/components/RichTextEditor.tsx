@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import EditorToolbar from "./EditorToolbar";
@@ -14,6 +15,7 @@ const RichTextEditor = ({ initialContent = "", documentId = "default" }: RichTex
   const [showToolbar, setShowToolbar] = useState(false);
   const [showSlashMenu, setShowSlashMenu] = useState(false);
   const [slashPosition, setSlashPosition] = useState({ top: 0, left: 0 });
+  const [slashQuery, setSlashQuery] = useState("");
   const [toolbarPosition, setToolbarPosition] = useState({ top: 0, left: 0 });
   const [isEmpty, setIsEmpty] = useState(true);
   const editorRef = useRef<HTMLDivElement>(null);
@@ -148,7 +150,16 @@ const RichTextEditor = ({ initialContent = "", documentId = "default" }: RichTex
       case 'h1':
       case 'h2':
       case 'h3':
+      case 'h4':
+      case 'h5':
+      case 'h6':
         formatHeading(format);
+        break;
+      case 'date':
+        insertDate();
+        break;
+      case 'time':
+        insertTime();
         break;
       default:
         break;
@@ -156,6 +167,7 @@ const RichTextEditor = ({ initialContent = "", documentId = "default" }: RichTex
 
     handleContentChange();
     setShowSlashMenu(false);
+    setSlashQuery("");
   };
 
   const insertTable = () => {
@@ -179,6 +191,18 @@ const RichTextEditor = ({ initialContent = "", documentId = "default" }: RichTex
       </table>
     `;
     document.execCommand('insertHTML', false, table);
+  };
+
+  const insertDate = () => {
+    const today = new Date();
+    const formattedDate = today.toLocaleDateString();
+    document.execCommand('insertText', false, formattedDate);
+  };
+
+  const insertTime = () => {
+    const now = new Date();
+    const formattedTime = now.toLocaleTimeString();
+    document.execCommand('insertText', false, formattedTime);
   };
 
   const formatHeading = (headingType: string) => {
@@ -205,18 +229,39 @@ const RichTextEditor = ({ initialContent = "", documentId = "default" }: RichTex
           left: rect.left
         });
         setShowSlashMenu(true);
+        setSlashQuery("");
         setShowToolbar(false);
       }
     } else if (event.key === 'Escape') {
       setShowSlashMenu(false);
+      setSlashQuery("");
+    } else if (showSlashMenu) {
+      if (event.key === 'Enter' && slashQuery) {
+        // Prevent default behavior when slash menu is open
+        event.preventDefault();
+        return;
+      }
+      
+      if (event.key === 'Backspace' && slashQuery.length === 0) {
+        setShowSlashMenu(false);
+      } else if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {
+        // Only update query for typing characters, not for navigation
+        if (event.key !== 'Backspace') {
+          setSlashQuery(prev => prev + event.key);
+        } else {
+          setSlashQuery(prev => prev.slice(0, -1));
+        }
+      }
     } else {
       setShowSlashMenu(false);
+      setSlashQuery("");
     }
   };
 
   const handleCommandSelect = (command: string) => {
     handleFormatText(command);
     setShowSlashMenu(false);
+    setSlashQuery("");
   };
 
   return (
@@ -243,8 +288,12 @@ const RichTextEditor = ({ initialContent = "", documentId = "default" }: RichTex
       {showSlashMenu && (
         <SlashCommandMenu
           position={slashPosition}
+          query={slashQuery}
           onCommandSelect={handleCommandSelect}
-          onClose={() => setShowSlashMenu(false)}
+          onClose={() => {
+            setShowSlashMenu(false);
+            setSlashQuery("");
+          }}
         />
       )}
 
@@ -258,7 +307,6 @@ const RichTextEditor = ({ initialContent = "", documentId = "default" }: RichTex
         dangerouslySetInnerHTML={{ __html: content }}
         dir="ltr"
         style={{
-          position: 'relative',
           direction: 'ltr',
           textAlign: 'left'
         }}
