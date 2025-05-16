@@ -1,7 +1,7 @@
-
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import EditorToolbar from "./EditorToolbar";
+import SlashCommandMenu from "./SlashCommandMenu";
 
 interface RichTextEditorProps {
   initialContent?: string;
@@ -15,6 +15,7 @@ const RichTextEditor = ({ initialContent = "", documentId = "default" }: RichTex
   const [showSlashMenu, setShowSlashMenu] = useState(false);
   const [slashPosition, setSlashPosition] = useState({ top: 0, left: 0 });
   const [toolbarPosition, setToolbarPosition] = useState({ top: 0, left: 0 });
+  const [isEmpty, setIsEmpty] = useState(true);
   const editorRef = useRef<HTMLDivElement>(null);
   const toolbarRef = useRef<HTMLDivElement>(null);
   const saveTimeoutRef = useRef<number | null>(null);
@@ -24,6 +25,7 @@ const RichTextEditor = ({ initialContent = "", documentId = "default" }: RichTex
     const savedContent = localStorage.getItem(`wrdspc-content-${documentId}`);
     if (savedContent) {
       setContent(savedContent);
+      setIsEmpty(savedContent.replace(/<[^>]*>/g, '').trim() === '');
       if (editorRef.current) {
         editorRef.current.innerHTML = savedContent;
       }
@@ -31,6 +33,10 @@ const RichTextEditor = ({ initialContent = "", documentId = "default" }: RichTex
   }, [documentId]);
 
   useEffect(() => {
+    // Check if content is empty
+    const cleanContent = content.replace(/<[^>]*>/g, '').trim();
+    setIsEmpty(cleanContent === '');
+    
     const handleSelectionChange = () => {
       const selection = window.getSelection();
       
@@ -86,7 +92,7 @@ const RichTextEditor = ({ initialContent = "", documentId = "default" }: RichTex
     
     document.addEventListener('selectionchange', handleSelectionChange);
     return () => document.removeEventListener('selectionchange', handleSelectionChange);
-  }, []);
+  }, [content]);
 
   const getParentOfType = (element: Element, types: string[]): Element | null => {
     let parent = element;
@@ -107,6 +113,10 @@ const RichTextEditor = ({ initialContent = "", documentId = "default" }: RichTex
     if (editorRef.current) {
       const newContent = editorRef.current.innerHTML;
       setContent(newContent);
+      
+      // Check if empty
+      const cleanContent = newContent.replace(/<[^>]*>/g, '').trim();
+      setIsEmpty(cleanContent === '');
       
       // Debounce saving to localStorage
       if (saveTimeoutRef.current) {
@@ -205,6 +215,11 @@ const RichTextEditor = ({ initialContent = "", documentId = "default" }: RichTex
     }
   };
 
+  const handleCommandSelect = (command: string) => {
+    handleFormatText(command);
+    setShowSlashMenu(false);
+  };
+
   return (
     <div className="relative">
       {/* Floating toolbar for text selection */}
@@ -218,7 +233,7 @@ const RichTextEditor = ({ initialContent = "", documentId = "default" }: RichTex
             transform: 'translateX(-50%)',
             zIndex: 50,
           }}
-          className="animate-fade-in"
+          className="animate-in"
         >
           <EditorToolbar 
             onFormatText={handleFormatText}
@@ -229,70 +244,39 @@ const RichTextEditor = ({ initialContent = "", documentId = "default" }: RichTex
       
       {/* Slash command menu */}
       {showSlashMenu && (
-        <div 
-          style={{
-            position: 'absolute',
-            top: `${slashPosition.top}px`,
-            left: `${slashPosition.left}px`,
-            zIndex: 50,
-          }}
-          className="bg-card border shadow-md rounded-md p-2 w-48 animate-fade-in"
-        >
-          <div className="text-sm font-medium mb-2 text-muted-foreground">Format</div>
-          <button 
-            onClick={() => handleFormatText('h1')} 
-            className="flex items-center w-full text-left px-2 py-1 hover:bg-accent rounded-sm"
-          >
-            <span className="text-lg font-bold">H1</span> 
-            <span className="ml-2 text-xs text-muted-foreground">Heading 1</span>
-          </button>
-          <button 
-            onClick={() => handleFormatText('h2')} 
-            className="flex items-center w-full text-left px-2 py-1 hover:bg-accent rounded-sm"
-          >
-            <span className="text-md font-bold">H2</span> 
-            <span className="ml-2 text-xs text-muted-foreground">Heading 2</span>
-          </button>
-          <button 
-            onClick={() => handleFormatText('h3')} 
-            className="flex items-center w-full text-left px-2 py-1 hover:bg-accent rounded-sm"
-          >
-            <span className="text-sm font-bold">H3</span> 
-            <span className="ml-2 text-xs text-muted-foreground">Heading 3</span>
-          </button>
-          <button 
-            onClick={() => handleFormatText('bullet')} 
-            className="flex items-center w-full text-left px-2 py-1 hover:bg-accent rounded-sm"
-          >
-            <span>• Bullet List</span>
-          </button>
-          <button 
-            onClick={() => handleFormatText('ordered')} 
-            className="flex items-center w-full text-left px-2 py-1 hover:bg-accent rounded-sm"
-          >
-            <span>1. Numbered List</span>
-          </button>
-          <button 
-            onClick={() => handleFormatText('table')} 
-            className="flex items-center w-full text-left px-2 py-1 hover:bg-accent rounded-sm"
-          >
-            <span>Table</span>
-          </button>
-        </div>
+        <SlashCommandMenu
+          position={slashPosition}
+          onCommandSelect={handleCommandSelect}
+          onClose={() => setShowSlashMenu(false)}
+        />
       )}
     
       {/* Editor content */}
       <div 
         ref={editorRef}
         contentEditable={true}
-        className="outline-none editor-content min-h-[70vh] py-4 bg-card px-2 rounded-md"
+        className="outline-none editor-content min-h-[70vh] py-4 bg-card px-6 rounded-md text-left"
         onInput={handleContentChange}
         onKeyDown={handleKeyDown}
         suppressContentEditableWarning={true}
         dangerouslySetInnerHTML={{ __html: content }}
-        dir="ltr" // Explicitly set text direction to left-to-right
-        style={{ unicodeBidi: 'bidi-override', direction: 'ltr' }} // Extra CSS to ensure correct text direction
+        dir="ltr" 
+        style={{ 
+          position: 'relative',
+          direction: 'ltr', 
+          textAlign: 'left'
+        }}
       />
+      
+      {/* Placeholder text when editor is empty */}
+      {isEmpty && (
+        <div 
+          className="absolute top-10 left-6 pointer-events-none text-muted-foreground"
+          style={{ zIndex: 5 }}
+        >
+          Start writing here...
+        </div>
+      )}
     </div>
   );
 };

@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import ThemeToggle from "@/components/ThemeToggle";
 import { useNavigate } from 'react-router-dom';
 import { toast } from "sonner";
 
@@ -39,6 +40,9 @@ const Index = () => {
         <div className="flex justify-between items-center">
           <div className="font-mono text-xl font-bold">
             WRDSPC
+          </div>
+          <div>
+            <ThemeToggle />
           </div>
         </div>
       </header>
