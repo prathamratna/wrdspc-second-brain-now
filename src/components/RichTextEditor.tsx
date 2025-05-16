@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import EditorToolbar from "./EditorToolbar";
@@ -305,14 +304,9 @@ const RichTextEditor = ({ initialContent = "", documentId = "default" }: RichTex
         onKeyDown={handleKeyDown}
         suppressContentEditableWarning={true}
         dangerouslySetInnerHTML={{ __html: content }}
-        dir="ltr"
         style={{
           direction: 'ltr',
-          unicodeBidi: 'plaintext',
           textAlign: 'left',
-          whiteSpace: 'pre-wrap',
-          overflowWrap: 'break-word',
-          wordBreak: 'break-word',
         }}
       />
 
