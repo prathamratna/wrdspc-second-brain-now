@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import EditorToolbar from "./EditorToolbar";
@@ -35,6 +34,13 @@ const RichTextEditor = ({ initialContent = "", documentId = "default" }: RichTex
   // Timeout for saving content
   const saveTimeoutRef = useRef<number | null>(null);
 
+  // Clear localStorage on component mount to remove any corrupted content
+  useEffect(() => {
+    // Clear only the current document's content
+    localStorage.removeItem(`wrdspc-content-${documentId}`);
+    console.log("Cleared localStorage for document:", documentId);
+  }, []);
+
   // Load saved content from localStorage when component loads or documentId changes
   useEffect(() => {
     const savedContent = localStorage.getItem(`wrdspc-content-${documentId}`);
@@ -50,7 +56,8 @@ const RichTextEditor = ({ initialContent = "", documentId = "default" }: RichTex
   const normalizeLTRContent = (html: string): string => {
     // Remove the Unicode control characters that might affect text direction
     // U+202A to U+202E and U+2066 to U+2069 are bidirectional control characters
-    return html.replace(/[\u202A-\u202E\u2066-\u2069]/g, '');
+    // Also removes any zero-width characters
+    return html.replace(/[\u202A-\u202E\u2066-\u2069\u200B-\u200F\u061C]/g, '');
   };
 
   // Ensure all HTML elements in content have left-to-right direction
@@ -133,13 +140,19 @@ const RichTextEditor = ({ initialContent = "", documentId = "default" }: RichTex
   const handleContentChange = () => {
     if (editorRef.current) {
       const newContent = editorRef.current.innerHTML;
-      setContent(newContent); // Update state
-      setIsEmpty(newContent.replace(/<[^>]*>/g, "").trim() === "");
+      // Normalize content before saving
+      const normalizedContent = normalizeLTRContent(ensureLTRInHTMLContent(newContent));
+      
+      setContent(normalizedContent); // Update state
+      setIsEmpty(normalizedContent.replace(/<[^>]*>/g, "").trim() === "");
+
+      // Debug log to track content changes
+      console.log("Content changed:", normalizedContent);
 
       // Save to localStorage after a 1-second delay
       if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
       saveTimeoutRef.current = window.setTimeout(() => {
-        localStorage.setItem(`wrdspc-content-${documentId}`, newContent);
+        localStorage.setItem(`wrdspc-content-${documentId}`, normalizedContent);
         toast("Changes saved", { duration: 1000, position: "bottom-right" });
         saveTimeoutRef.current = null;
       }, 1000);
@@ -226,9 +239,42 @@ const RichTextEditor = ({ initialContent = "", documentId = "default" }: RichTex
     }
   };
 
+  // Log typing events for debugging
+  const handleInput = (event: React.FormEvent<HTMLDivElement>) => {
+    console.log("Input event:", event.currentTarget.innerHTML);
+    handleContentChange();
+  };
+
+  // Force focus to ensure correct cursor positioning
+  const handleFocus = () => {
+    if (editorRef.current) {
+      // Move cursor to the end of content when focused
+      const range = document.createRange();
+      const sel = window.getSelection();
+      
+      if (editorRef.current.childNodes.length > 0) {
+        const lastChild = editorRef.current.lastChild;
+        if (lastChild) {
+          range.setStartAfter(lastChild);
+          range.collapse(true);
+          
+          if (sel) {
+            sel.removeAllRanges();
+            sel.addRange(range);
+          }
+        }
+      }
+    }
+  };
+
+  // Fix cursor on click
+  const handleClick = () => {
+    console.log("Editor clicked");
+  };
+
   // Render the editor
   return (
-    <div className="relative editor-container" dir="ltr" style={{ direction: "ltr", textAlign: "left" }}>
+    <div className="relative editor-container" dir="ltr">
       {/* Toolbar for formatting options */}
       {showToolbar && (
         <div
@@ -264,12 +310,15 @@ const RichTextEditor = ({ initialContent = "", documentId = "default" }: RichTex
       <div
         ref={editorRef}
         contentEditable={true}
-        className="outline-none editor-content min-h-[70vh] py-4 bg-background px-6 text-left"
-        onInput={handleContentChange}
+        className="force-ltr outline-none editor-content min-h-[70vh] py-4 bg-background px-6 text-left"
+        onInput={handleInput}
+        onClick={handleClick}
+        onFocus={handleFocus}
         onKeyDown={handleKeyDown}
         suppressContentEditableWarning={true}
         dangerouslySetInnerHTML={{ __html: content }}
         dir="ltr"
+        spellCheck="false"
         style={{
           direction: "ltr", 
           textAlign: "left", 
@@ -277,14 +326,16 @@ const RichTextEditor = ({ initialContent = "", documentId = "default" }: RichTex
           whiteSpace: "pre-wrap",
           overflowWrap: "break-word",
           wordBreak: "break-word",
-          writingMode: "horizontal-tb"
+          writingMode: "horizontal-tb",
+          caretColor: "auto",
+          WebkitUserModify: "read-write"
         }}
       />
 
       {/* Placeholder text when editor is empty */}
       {isEmpty && (
         <div
-          className="absolute top-4 left-6 pointer-events-none text-muted-foreground"
+          className="absolute top-4 left-6 pointer-events-none text-muted-foreground force-ltr"
           style={{ zIndex: 5 }}
           dir="ltr"
         >

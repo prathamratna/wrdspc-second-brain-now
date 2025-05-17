@@ -14,6 +14,18 @@ const Editor = () => {
   const [documentIcon, setDocumentIcon] = useState("📄");
   const [isInitialized, setIsInitialized] = useState(false);
 
+  // Force LTR direction for the entire document
+  useEffect(() => {
+    document.documentElement.setAttribute('dir', 'ltr');
+    document.body.setAttribute('dir', 'ltr');
+    
+    return () => {
+      // Clean up when component unmounts
+      document.documentElement.removeAttribute('dir');
+      document.body.removeAttribute('dir');
+    };
+  }, []);
+
   useEffect(() => {
     // Load document metadata from localStorage
     const savedTitle = localStorage.getItem("wrdspc-title-default");
@@ -48,10 +60,10 @@ const Editor = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col" dir="ltr" style={{ direction: "ltr", textAlign: "left" }}>
-      <header className="border-b sticky top-0 bg-background/80 backdrop-blur-sm z-10" dir="ltr">
-        <div className="container flex items-center justify-between h-14 px-4 sm:px-6" dir="ltr">
-          <div className="flex items-center gap-3" dir="ltr">
+    <div className="min-h-screen flex flex-col force-ltr" dir="ltr">
+      <header className="border-b sticky top-0 bg-background/80 backdrop-blur-sm z-10 force-ltr">
+        <div className="container flex items-center justify-between h-14 px-4 sm:px-6">
+          <div className="flex items-center gap-3">
             <Button
               variant="ghost"
               size="icon"
@@ -62,7 +74,7 @@ const Editor = () => {
               <ArrowLeft className="h-5 w-5" />
             </Button>
             
-            <div className="flex items-center gap-2" dir="ltr">
+            <div className="flex items-center gap-2">
               <EmojiPicker 
                 onEmojiSelect={handleEmojiSelect}
                 selectedEmoji={documentIcon} 
@@ -71,7 +83,7 @@ const Editor = () => {
               <Input
                 value={documentTitle}
                 onChange={handleTitleChange}
-                className="font-medium text-lg border-none focus-visible:ring-0 px-0 max-w-[200px] sm:max-w-xs"
+                className="force-ltr font-medium text-lg border-none focus-visible:ring-0 px-0 max-w-[200px] sm:max-w-xs"
                 dir="ltr"
                 style={{ direction: "ltr", textAlign: "left" }}
               />
@@ -84,7 +96,7 @@ const Editor = () => {
         </div>
       </header>
 
-      <main className="flex-1 container px-4 sm:px-6 py-6 max-w-4xl mx-auto" dir="ltr">
+      <main className="flex-1 container px-4 sm:px-6 py-6 max-w-4xl mx-auto force-ltr">
         <RichTextEditor />
       </main>
     </div>

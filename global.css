@@ -41,6 +41,9 @@ html[dir="rtl"] .editor-content * {
   direction: ltr !important;
   unicode-bidi: plaintext !important;
   writing-mode: horizontal-tb !important;
+  text-orientation: mixed !important;
+  caret-color: auto !important;
+  -webkit-user-modify: read-write !important;
 }
 
 /* Target any browser-injected RTL */
@@ -49,4 +52,23 @@ html[dir="rtl"] .editor-content * {
   direction: ltr !important;
   text-align: left !important;
   unicode-bidi: plaintext !important;
+}
+
+/* Ensure caret visibility */
+[contenteditable="true"] {
+  caret-color: auto !important;
+}
+
+/* Ensure browser focus behavior */
+[contenteditable="true"]:focus {
+  outline: none !important;
+  caret-color: auto !important;
+}
+
+/* Fix for webkit browsers */
+@supports (-webkit-overflow-scrolling: touch) {
+  [contenteditable="true"] {
+    -webkit-user-modify: read-write !important;
+    -webkit-user-select: text !important;
+  }
 }
