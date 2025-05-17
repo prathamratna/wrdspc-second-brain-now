@@ -333,17 +333,19 @@ const RichTextEditor = ({ initialContent = "", documentId = "default" }: RichTex
         }}
       />
 
-      {/* Placeholder text when editor is empty */}
-      {isEmpty && (
-        <div
-          className="absolute top-4 left-6 pointer-events-none text-muted-foreground force-ltr"
-          style={{ zIndex: 5 }}
-          dir="ltr"
-        >
-          Start writing here...
-        </div>
-      )}
-    </div>
+      <div className="editor-wrapper relative">
+  <div
+    className={`editor-placeholder absolute top-0 left-0 text-gray-400 pointer-events-none px-2 py-1 ${isEmpty ? '' : 'hidden'}`}
+  >
+    Start writing here...
+  </div>
+  <div
+    className="editor-content"
+    contentEditable
+    ref={editorRef}
+    onInput={handleInput}
+  />
+</div>
   );
 };
 
