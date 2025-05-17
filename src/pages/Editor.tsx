@@ -18,11 +18,36 @@ const Editor = () => {
   useEffect(() => {
     document.documentElement.setAttribute('dir', 'ltr');
     document.body.setAttribute('dir', 'ltr');
+    document.body.style.direction = 'ltr';
+    document.body.style.textAlign = 'left';
+    document.documentElement.style.direction = 'ltr';
+    document.documentElement.style.textAlign = 'left';
+    
+    // Apply LTR mode to all content editable elements
+    const applyLTRtoContentEditable = () => {
+      const editables = document.querySelectorAll('[contenteditable="true"]');
+      editables.forEach(el => {
+        if (el instanceof HTMLElement) {
+          el.dir = 'ltr';
+          el.style.direction = 'ltr';
+          el.style.textAlign = 'left';
+          el.setAttribute('spellcheck', 'false');
+        }
+      });
+    };
+    
+    // Run initially
+    applyLTRtoContentEditable();
+    
+    // Also run when DOM changes
+    const observer = new MutationObserver(applyLTRtoContentEditable);
+    observer.observe(document.body, { childList: true, subtree: true });
     
     return () => {
       // Clean up when component unmounts
       document.documentElement.removeAttribute('dir');
       document.body.removeAttribute('dir');
+      observer.disconnect();
     };
   }, []);
 
