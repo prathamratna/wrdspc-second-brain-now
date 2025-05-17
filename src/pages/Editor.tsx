@@ -48,10 +48,10 @@ const Editor = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="border-b sticky top-0 bg-background/80 backdrop-blur-sm z-10">
-        <div className="container flex items-center justify-between h-14 px-4 sm:px-6">
-          <div className="flex items-center gap-3">
+    <div className="min-h-screen flex flex-col" dir="ltr" style={{ direction: "ltr", textAlign: "left" }}>
+      <header className="border-b sticky top-0 bg-background/80 backdrop-blur-sm z-10" dir="ltr">
+        <div className="container flex items-center justify-between h-14 px-4 sm:px-6" dir="ltr">
+          <div className="flex items-center gap-3" dir="ltr">
             <Button
               variant="ghost"
               size="icon"
@@ -62,7 +62,7 @@ const Editor = () => {
               <ArrowLeft className="h-5 w-5" />
             </Button>
             
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2" dir="ltr">
               <EmojiPicker 
                 onEmojiSelect={handleEmojiSelect}
                 selectedEmoji={documentIcon} 
@@ -72,6 +72,8 @@ const Editor = () => {
                 value={documentTitle}
                 onChange={handleTitleChange}
                 className="font-medium text-lg border-none focus-visible:ring-0 px-0 max-w-[200px] sm:max-w-xs"
+                dir="ltr"
+                style={{ direction: "ltr", textAlign: "left" }}
               />
             </div>
           </div>
@@ -82,7 +84,7 @@ const Editor = () => {
         </div>
       </header>
 
-      <main className="flex-1 container px-4 sm:px-6 py-6 max-w-4xl mx-auto">
+      <main className="flex-1 container px-4 sm:px-6 py-6 max-w-4xl mx-auto" dir="ltr">
         <RichTextEditor />
       </main>
     </div>

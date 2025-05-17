@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import EditorToolbar from "./EditorToolbar";
@@ -39,20 +40,35 @@ const RichTextEditor = ({ initialContent = "", documentId = "default" }: RichTex
     const savedContent = localStorage.getItem(`wrdspc-content-${documentId}`);
     if (savedContent) {
       // Process content to ensure left-to-right direction
-      const processedContent = ensureLTRInHTMLContent(savedContent);
+      const processedContent = normalizeLTRContent(ensureLTRInHTMLContent(savedContent));
       setContent(processedContent); // Update state to display content
       setIsEmpty(processedContent.replace(/<[^>]*>/g, "").trim() === "");
     }
   }, [documentId]);
 
+  // Remove bidirectional override characters from the content
+  const normalizeLTRContent = (html: string): string => {
+    // Remove the Unicode control characters that might affect text direction
+    // U+202A to U+202E and U+2066 to U+2069 are bidirectional control characters
+    return html.replace(/[\u202A-\u202E\u2066-\u2069]/g, '');
+  };
+
   // Ensure all HTML elements in content have left-to-right direction
   const ensureLTRInHTMLContent = (html: string): string => {
-    return html.replace(/<([a-z][a-z0-9]*)\b([^>]*)>/gi, (match, tag, attributes) => {
-      // Replace existing dir attribute or add new one
-      if (attributes.includes("dir=")) {
-        return match.replace(/dir="[^"]*"/g, 'dir="ltr"');
+    // First, remove any existing RTL attributes
+    const withoutRTL = html.replace(/dir="rtl"/gi, 'dir="ltr"')
+                          .replace(/style="([^"]*?)text-align:\s*right([^"]*?)"/gi, 'style="$1text-align: left$2"')
+                          .replace(/style="([^"]*?)direction:\s*rtl([^"]*?)"/gi, 'style="$1direction: ltr$2"');
+                          
+    // Then ensure all elements have LTR attributes
+    return withoutRTL.replace(/<([a-z][a-z0-9]*)\b([^>]*)>/gi, (match, tag, attributes) => {
+      // Add style attribute with direction properties if it doesn't exist
+      if (!attributes.includes('style=')) {
+        return `<${tag}${attributes} dir="ltr" style="direction: ltr; text-align: left; unicode-bidi: plaintext;">`;
       }
-      return `<${tag}${attributes} dir="ltr" style="direction: ltr; text-align: left;">`;
+      // Style attribute exists, add our properties to it
+      return match.replace(/style="([^"]*)"/gi, 
+        'style="$1; direction: ltr; text-align: left; unicode-bidi: plaintext;"');
     });
   };
 
@@ -254,7 +270,15 @@ const RichTextEditor = ({ initialContent = "", documentId = "default" }: RichTex
         suppressContentEditableWarning={true}
         dangerouslySetInnerHTML={{ __html: content }}
         dir="ltr"
-        style={{ direction: "ltr", textAlign: "left", unicodeBidi: "isolate" }}
+        style={{
+          direction: "ltr", 
+          textAlign: "left", 
+          unicodeBidi: "plaintext",
+          whiteSpace: "pre-wrap",
+          overflowWrap: "break-word",
+          wordBreak: "break-word",
+          writingMode: "horizontal-tb"
+        }}
       />
 
       {/* Placeholder text when editor is empty */}

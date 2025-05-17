@@ -1,11 +1,14 @@
-// Add this to your globals.css or a custom CSS file
 
 /* Force LTR direction on editor content */
 [contenteditable="true"],
 [contenteditable="true"] * {
   direction: ltr !important;
   text-align: left !important;
-  unicode-bidi: isolate !important;
+  unicode-bidi: plaintext !important;
+  writing-mode: horizontal-tb !important;
+  white-space: pre-wrap !important;
+  overflow-wrap: break-word !important;
+  word-break: break-word !important;
 }
 
 /* Target specific editor classes */
@@ -13,13 +16,16 @@
 .editor-content * {
   direction: ltr !important;
   text-align: left !important;
-  unicode-bidi: isolate !important;
+  unicode-bidi: plaintext !important;
+  writing-mode: horizontal-tb !important;
+  white-space: pre-wrap !important;
 }
 
 /* Ensure LTR for placeholder text */
 .editor-placeholder {
   direction: ltr !important;
   text-align: left !important;
+  unicode-bidi: plaintext !important;
 }
 
 /* Prevent any RTL inheritance */
@@ -27,12 +33,14 @@ html[dir="rtl"] .editor-content,
 html[dir="rtl"] .editor-content * {
   direction: ltr !important;
   text-align: left !important;
+  unicode-bidi: plaintext !important;
 }
 
 /* Force input caret to respect LTR */
 .force-ltr {
   direction: ltr !important;
-  unicode-bidi: isolate-override !important;
+  unicode-bidi: plaintext !important;
+  writing-mode: horizontal-tb !important;
 }
 
 /* Target any browser-injected RTL */
@@ -40,4 +48,5 @@ html[dir="rtl"] .editor-content * {
 *[style*="direction: rtl"] {
   direction: ltr !important;
   text-align: left !important;
+  unicode-bidi: plaintext !important;
 }
