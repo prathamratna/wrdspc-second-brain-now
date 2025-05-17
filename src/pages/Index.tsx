@@ -1,102 +1,58 @@
-
-import { useState } from 'react';
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import ThemeToggle from "@/components/ThemeToggle";
 import { useNavigate } from 'react-router-dom';
-import { toast } from "sonner";
+import { useState, useEffect } from 'react';
 
 const Index = () => {
-  const [showSignup, setShowSignup] = useState(false);
-  const [email, setEmail] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDark, setIsDark] = useState(() => {
+    if (typeof window !== 'undefined') {
+      if (localStorage.getItem('theme')) {
+        return localStorage.getItem('theme') === 'dark';
+      }
+      return true; // Default to dark mode
+    }
+    return true;
+  });
   const navigate = useNavigate();
 
-  const handleStartWriting = () => {
-    setShowSignup(true);
-  };
-
-  const handleSignup = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!email.trim() || !email.includes('@')) {
-      toast.error("Please enter a valid email address");
-      return;
+  useEffect(() => {
+    if (isDark) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem('theme', 'light');
     }
-    
-    setIsSubmitting(true);
-    
-    // Simulate account creation/login
-    setTimeout(() => {
-      toast.success("Welcome to WRDSPC!");
-      navigate("/editor");
-    }, 1500);
-  };
+  }, [isDark]);
 
   return (
-    <div className="min-h-screen flex flex-col landing-gradient">
-      <header className="container mx-auto py-6 px-4">
-        <div className="flex justify-between items-center">
-          <div className="font-mono text-xl font-bold">
-            WRDSPC
-          </div>
-          <div>
-            <ThemeToggle />
-          </div>
-        </div>
+    <div className="min-h-screen flex flex-col font-sans bg-background transition-colors">
+      <header className="flex items-center justify-between px-8 py-6">
+        <div className="font-mono text-2xl font-bold select-none tracking-wide">WRDSPC</div>
+        <button
+          onClick={() => setIsDark((d) => !d)}
+          className={`rounded-full p-2 text-2xl transition-colors focus:outline-none focus:ring-2 focus:ring-primary
+            ${isDark ? 'text-white hover:bg-neutral-800' : 'text-gray-700 hover:bg-gray-200'}
+          `}
+          aria-label="Toggle dark mode"
+        >
+          {isDark ? <span className="inline-block">🌞</span> : <span className="inline-block">🌙</span>}
+        </button>
       </header>
-
-      <main className="flex-1 flex flex-col items-center justify-center px-4">
-        <div className="max-w-3xl mx-auto text-center animate-slide-up">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight mb-6">
-            Your second brain,{" "}
-            <span className="text-primary">simplified.</span>
-          </h1>
-          
-          <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            A writing space that's lightning fast, distraction-free, and built for people 
-            who hate setting up Notion.
-          </p>
-
-          {!showSignup ? (
-            <Button 
-              onClick={handleStartWriting} 
-              size="lg" 
-              className="rounded-full px-8 py-6 text-lg animate-in"
-            >
-              Start Writing Now
-            </Button>
-          ) : (
-            <Card className="p-6 max-w-md mx-auto animate-fade-in">
-              <form onSubmit={handleSignup} className="space-y-4">
-                <h2 className="text-xl font-medium mb-4">Create your writing space</h2>
-                <Input
-                  type="email"
-                  placeholder="Enter your email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="h-12"
-                  required
-                />
-                <Button 
-                  type="submit" 
-                  className="w-full h-12" 
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? "Creating your space..." : "Continue →"}
-                </Button>
-                <p className="text-xs text-center text-muted-foreground pt-2">
-                  We'll send you a magic link to sign in.
-                </p>
-              </form>
-            </Card>
-          )}
-        </div>
+      <main className="flex-1 flex flex-col items-center justify-center text-center">
+        <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold mb-8 leading-tight">
+          Your second brain,<br />simplified.
+        </h1>
+        <p className="text-lg md:text-2xl text-muted-foreground mb-10 max-w-2xl mx-auto">
+          A writing space that's lightning fast, distraction-free, and built for people who hate setting up Notion.
+        </p>
+        <button
+          onClick={() => navigate('/home')}
+          className="px-10 py-4 rounded-2xl bg-primary text-primary-foreground text-xl font-semibold shadow-md hover:bg-primary/90 transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
+        >
+          Start Writing Now
+        </button>
       </main>
-
-      <footer className="container mx-auto py-6 px-4 text-center text-sm text-muted-foreground">
-        <p>© 2025 WRDSPC. All rights reserved.</p>
+      <footer className="py-6 px-4 text-center text-sm text-muted-foreground">
+        © 2025 WRDSPC. All rights reserved.
       </footer>
     </div>
   );

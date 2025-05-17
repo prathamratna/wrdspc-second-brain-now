@@ -1,129 +1,138 @@
-
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import ThemeToggle from "@/components/ThemeToggle";
 import EmojiPicker from "@/components/EmojiPicker";
 import RichTextEditor from "@/components/RichTextEditor";
-import { ArrowLeft } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useRef } from "react";
+
+interface Page {
+  id: string;
+  title: string;
+  emoji: string;
+  content?: string;
+}
+
+const getPages = (): Page[] => {
+  const data = localStorage.getItem("pages");
+  return data ? JSON.parse(data) : [];
+};
+
+const savePages = (pages: Page[]) => {
+  localStorage.setItem("pages", JSON.stringify(pages));
+};
 
 const Editor = () => {
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [documentTitle, setDocumentTitle] = useState("Untitled Document");
-  const [documentIcon, setDocumentIcon] = useState("📄");
-  const [isInitialized, setIsInitialized] = useState(false);
+  const [page, setPage] = useState<Page | null>(null);
+  const [notFound, setNotFound] = useState(false);
+  const [isDark, setIsDark] = useState(() => {
+    if (typeof window !== 'undefined') {
+      if (localStorage.getItem('theme')) {
+        return localStorage.getItem('theme') === 'dark';
+      }
+      return true; // Default to dark mode
+    }
+    return true;
+  });
+  const [showToast, setShowToast] = useState(false);
 
-  // Force LTR direction for the entire document
   useEffect(() => {
-    document.documentElement.setAttribute('dir', 'ltr');
-    document.body.setAttribute('dir', 'ltr');
-    document.body.style.direction = 'ltr';
-    document.body.style.textAlign = 'left';
-    document.documentElement.style.direction = 'ltr';
-    document.documentElement.style.textAlign = 'left';
-    
-    // Apply LTR mode to all content editable elements
-    const applyLTRtoContentEditable = () => {
-      const editables = document.querySelectorAll('[contenteditable="true"]');
-      editables.forEach(el => {
-        if (el instanceof HTMLElement) {
-          el.dir = 'ltr';
-          el.style.direction = 'ltr';
-          el.style.textAlign = 'left';
-          el.setAttribute('spellcheck', 'false');
-        }
-      });
-    };
-    
-    // Run initially
-    applyLTRtoContentEditable();
-    
-    // Also run when DOM changes
-    const observer = new MutationObserver(applyLTRtoContentEditable);
-    observer.observe(document.body, { childList: true, subtree: true });
-    
-    return () => {
-      // Clean up when component unmounts
-      document.documentElement.removeAttribute('dir');
-      document.body.removeAttribute('dir');
-      observer.disconnect();
-    };
+    const pages = getPages();
+    const found = pages.find((p) => p.id === id);
+    if (!found) {
+      setNotFound(true);
+      return;
+    }
+    setPage(found);
+  }, [id]);
+
+  useEffect(() => {
+    if (isDark) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem('theme', 'light');
+    }
+  }, [isDark]);
+
+  useEffect(() => {
+    setShowToast(true);
+    const timer = setTimeout(() => setShowToast(false), 3000);
+    return () => clearTimeout(timer);
   }, []);
 
-  useEffect(() => {
-    // Load document metadata from localStorage
-    const savedTitle = localStorage.getItem("wrdspc-title-default");
-    const savedIcon = localStorage.getItem("wrdspc-icon-default");
-    
-    if (savedTitle) setDocumentTitle(savedTitle);
-    if (savedIcon) setDocumentIcon(savedIcon);
-    
-    setIsInitialized(true);
-  }, []);
-
-  useEffect(() => {
-    // Save title changes to localStorage
-    if (isInitialized) {
-      localStorage.setItem("wrdspc-title-default", documentTitle);
+  const updatePage = (updates: Partial<Page>) => {
+    if (!page) return;
+    const updated = { ...page, ...updates };
+    setPage(updated);
+    const pages = getPages();
+    const idx = pages.findIndex((p) => p.id === page.id);
+    if (idx !== -1) {
+      pages[idx] = updated;
+      savePages(pages);
     }
-  }, [documentTitle, isInitialized]);
-
-  useEffect(() => {
-    // Save icon changes to localStorage
-    if (isInitialized) {
-      localStorage.setItem("wrdspc-icon-default", documentIcon);
-    }
-  }, [documentIcon, isInitialized]);
-
-  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setDocumentTitle(e.target.value);
   };
 
-  const handleEmojiSelect = (emoji: string) => {
-    setDocumentIcon(emoji);
-  };
+  if (notFound) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">Page not found</h1>
+          <Button onClick={() => navigate("/home")}>Back to Home</Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!page) return null;
 
   return (
-    <div className="min-h-screen flex flex-col force-ltr" dir="ltr">
-      <header className="border-b sticky top-0 bg-background/80 backdrop-blur-sm z-10 force-ltr">
-        <div className="container flex items-center justify-between h-14 px-4 sm:px-6">
-          <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate("/")}
-              className="rounded-full"
-              title="Back to home"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            
-            <div className="flex items-center gap-2">
-              <EmojiPicker 
-                onEmojiSelect={handleEmojiSelect}
-                selectedEmoji={documentIcon} 
-              />
-              
-              <Input
-                value={documentTitle}
-                onChange={handleTitleChange}
-                className="force-ltr font-medium text-lg border-none focus-visible:ring-0 px-0 max-w-[200px] sm:max-w-xs"
-                dir="ltr"
-                style={{ direction: "ltr", textAlign: "left" }}
-              />
-            </div>
-          </div>
-          
-          <div>
-            <ThemeToggle />
-          </div>
+    <div className="min-h-screen w-full bg-background font-sans transition-colors relative">
+      <header className="flex items-center justify-between px-8 py-3 border-b border-border bg-background">
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => navigate("/home")}
+            className="text-2xl text-foreground bg-transparent border-none shadow-none outline-none focus:outline-none hover:bg-foreground/10 transition-colors px-0 py-0 flex items-center"
+            title="Back to home"
+            aria-label="Back to home"
+            style={{ background: 'none', fontFamily: 'Arial, sans-serif' }}
+          >
+            
+          </button>
+          <EmojiPicker
+            selectedEmoji={page.emoji}
+            onEmojiSelect={(emoji) => updatePage({ emoji })}
+          />
+          <Input
+            value={page.title}
+            onChange={(e) => updatePage({ title: e.target.value })}
+            className="font-bold text-2xl border-none focus-visible:ring-0 px-0 bg-transparent tracking-tight leading-snug max-w-[320px] sm:max-w-xs"
+            placeholder="Untitled Document"
+          />
         </div>
+        <button
+          onClick={() => setIsDark((d) => !d)}
+          className={`rounded-full p-2 text-2xl transition-colors focus:outline-none focus:ring-2 focus:ring-primary
+            ${isDark ? 'text-white hover:bg-neutral-800' : 'text-gray-700 hover:bg-gray-200'}
+          `}
+          aria-label="Toggle dark mode"
+        >
+          {isDark ? <span className="inline-block">🌞</span> : <span className="inline-block">🌙</span>}
+        </button>
       </header>
-
-      <main className="flex-1 container px-4 sm:px-6 py-6 max-w-4xl mx-auto force-ltr">
-        <RichTextEditor />
-      </main>
+      <RichTextEditor
+        value={page.content || ""}
+        onChange={(content: string) => updatePage({ content })}
+      />
+      {showToast && (
+        <div className="fixed bottom-6 right-6 z-50 bg-background border border-border rounded-xl shadow-lg px-6 py-4 flex items-center gap-3 text-foreground animate-in">
+          <span className="text-xl">✔️</span>
+          <span className="font-medium">Welcome to WRDSPC!</span>
+        </div>
+      )}
     </div>
   );
 };

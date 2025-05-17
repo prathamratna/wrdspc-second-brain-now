@@ -1,52 +1,76 @@
+import { useRef, useState, useEffect } from "react";
 
-import { useState, useEffect, useRef } from "react";
-import { Button } from "@/components/ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-
-const COMMON_EMOJIS = [
+const EMOJIS = [
   "📝", "📚", "✅", "🎯", "💡", "🔍", "📌", "🗓️", "📊", "🏆",
-  "🧠", "💭", "💬", "📬", "🗂️", "⚡", "🌟", "🔖", "📋", "📎"
+  "🧠", "💭", "💬", "📬", "🗂️", "⚡", "🌟", "🔖", "📋", "📎",
+  "😀", "😁", "😂", "🤣", "😃", "😄", "😅", "😆", "😉", "😊",
+  "😋", "😎", "😍", "😘", "🥰", "😗", "😙", "😚", "🙂", "🤗",
+  "🤩", "🤔", "🤨", "😐", "😑", "😶", "🙄", "😏", "😣", "😥",
+  "😮", "🤐", "😯", "😪", "😫", "🥱", "😴", "😌", "😛", "😜",
+  "😝", "🤤", "😒", "😓", "😔", "😕", "🙃", "🤑", "😲", "☹️",
+  "🙁", "😖", "😞", "😟", "😤", "😢", "😭", "😦", "😧", "😨",
+  "😩", "🤯", "😬", "😰", "😱", "🥵", "🥶", "😳", "🤪", "😵",
+  "😡", "😠", "🤬", "😷", "🤒", "🤕", "🤢", "🤮", "🤧", "😇"
 ];
 
-interface EmojiPickerProps {
-  onEmojiSelect: (emoji: string) => void;
-  selectedEmoji: string;
-}
+export default function EmojiPicker({ onEmojiSelect, selectedEmoji }: { onEmojiSelect: (e: string) => void, selectedEmoji: string }) {
+  const [open, setOpen] = useState(false);
+  const iconRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
-const EmojiPicker = ({ onEmojiSelect, selectedEmoji }: EmojiPickerProps) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const popoverRef = useRef<HTMLDivElement>(null);
+  // Close on outside click
+  useEffect(() => {
+    if (!open) return;
+    function handle(e: MouseEvent) {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(e.target as Node) &&
+        iconRef.current &&
+        !iconRef.current.contains(e.target as Node)
+      ) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handle);
+    return () => document.removeEventListener("mousedown", handle);
+  }, [open]);
 
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
-      <PopoverTrigger asChild>
-        <Button 
-          variant="outline" 
-          className="w-10 h-10 p-0 text-xl rounded-md border-dashed"
+    <div className="relative inline-block" style={{ fontFamily: 'Inter, sans-serif' }}>
+      <button
+        ref={iconRef}
+        className="text-2xl bg-transparent border-none outline-none p-0 m-0"
+        onClick={() => setOpen((v) => !v)}
+        aria-label="Select emoji"
+        type="button"
+      >
+        {selectedEmoji || "🙂"}
+      </button>
+      {open && (
+        <div
+          ref={menuRef}
+          className="absolute left-0 mt-3 p-0 z-50"
+          style={{ minWidth: 240, maxHeight: 240, overflowY: "auto", background: "transparent", boxShadow: "none", border: "none", fontFamily: 'Inter, sans-serif' }}
         >
-          {selectedEmoji || "📄"}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-full max-w-sm p-2" ref={popoverRef}>
-        <div className="text-sm font-medium mb-2">Select icon</div>
-        <div className="grid grid-cols-10 gap-1">
-          {COMMON_EMOJIS.map((emoji) => (
-            <Button
-              key={emoji}
-              variant="ghost"
-              className="h-8 w-8 p-0"
-              onClick={() => {
-                onEmojiSelect(emoji);
-                setIsOpen(false);
-              }}
-            >
-              {emoji}
-            </Button>
-          ))}
+          <div className="grid grid-cols-5 gap-2">
+            {EMOJIS.map((emoji) => (
+              <button
+                key={emoji}
+                className="text-2xl bg-transparent border-none outline-none p-0 m-0"
+                style={{ cursor: "pointer" }}
+                onClick={() => {
+                  onEmojiSelect(emoji);
+                  setOpen(false);
+                }}
+                type="button"
+                aria-label={emoji}
+              >
+                {emoji}
+              </button>
+            ))}
+          </div>
         </div>
-      </PopoverContent>
-    </Popover>
+      )}
+    </div>
   );
-};
-
-export default EmojiPicker;
+}
