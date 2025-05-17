@@ -65,6 +65,20 @@ html[dir="rtl"] .editor-content * {
   caret-color: auto !important;
 }
 
+.editor-wrapper {
+  position: relative;
+}
+
+.editor-placeholder {
+  position: absolute;
+  z-index: 0;
+}
+
+.editor-content {
+  position: relative;
+  z-index: 1;
+}
+
 /* Fix for webkit browsers */
 @supports (-webkit-overflow-scrolling: touch) {
   [contenteditable="true"] {
