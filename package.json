@@ -3,7 +3,8 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "scripts": {build:dev": "vite build --mode development
+  "scripts": {
+    "build:dev": "vite build" --mode development
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"
