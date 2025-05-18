@@ -92,16 +92,18 @@ const Editor = () => {
 
   return (
     <div className="min-h-screen w-full bg-background font-sans transition-colors relative">
-      <header className="flex items-center justify-between px-8 py-3 border-b border-border bg-background">
+      <header className="flex items-center justify-between px-8 py-3 border-b border-border bg-background sticky top-0 z-10">
         <div className="flex items-center gap-4">
-          <button
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => navigate("/home")}
-            className="flex items-center gap-1 px-3 py-2 rounded-md hover:bg-secondary transition-colors text-foreground"
+            className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
             aria-label="Back to home"
           >
             <ChevronLeft size={18} />
             <span>Back</span>
-          </button>
+          </Button>
           <EmojiPicker
             selectedEmoji={page.emoji}
             onEmojiSelect={(emoji) => updatePage({ emoji })}
@@ -109,7 +111,7 @@ const Editor = () => {
           <Input
             value={page.title}
             onChange={(e) => updatePage({ title: e.target.value })}
-            className="font-bold text-2xl border-none focus-visible:ring-0 px-0 bg-background text-foreground tracking-tight leading-snug max-w-[320px] sm:max-w-xs placeholder:text-muted-foreground"
+            className="font-bold text-xl border-none focus-visible:ring-0 px-0 bg-background text-foreground tracking-tight leading-snug max-w-[320px] sm:max-w-xs placeholder:text-muted-foreground"
             placeholder="Untitled Document"
           />
         </div>
@@ -126,7 +128,7 @@ const Editor = () => {
         onChange={(content: string) => updatePage({ content })}
       />
       {showToast && (
-        <div className="fixed bottom-6 right-6 z-50 bg-background border border-border rounded-xl shadow-lg px-6 py-4 flex items-center gap-3 text-foreground animate-in">
+        <div className="fixed bottom-6 right-6 z-50 bg-card border border-border rounded-xl shadow-lg px-6 py-4 flex items-center gap-3 text-foreground animate-in">
           <span className="text-xl">✔️</span>
           <span className="font-medium">Welcome to WRDSPC!</span>
         </div>

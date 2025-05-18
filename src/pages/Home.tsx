@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import EmojiPicker from "@/components/EmojiPicker";
 import { Input } from "@/components/ui/input";
+import { PlusCircle } from "lucide-react";
 
 interface Page {
   id: string;
@@ -67,7 +68,7 @@ const Home = () => {
   return (
     <div className="w-full min-h-screen bg-background font-sans transition-colors" style={{ paddingTop: '2.5vh' }}>
       <header className="flex items-center justify-between px-8 py-2">
-        <h1 className="font-mono text-2xl font-bold select-none tracking-wide h-12 flex items-center text-foreground">Your Pages</h1>
+        <h1 className="font-sans text-2xl font-semibold select-none h-12 flex items-center text-foreground">Your Pages</h1>
         <button
           onClick={() => setIsDark((d) => !d)}
           className="rounded-full p-2 text-xl transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
@@ -79,7 +80,8 @@ const Home = () => {
       <div className="max-w-xl mx-auto px-4">
         <div className="flex justify-between items-center mb-6">
           <span />
-          <Button onClick={() => setShowNew((v) => !v)}>
+          <Button onClick={() => setShowNew((v) => !v)} className="flex items-center gap-2">
+            <PlusCircle size={18} />
             New Page
           </Button>
         </div>
@@ -87,7 +89,7 @@ const Home = () => {
           <Card className="mb-6 p-4 flex items-center gap-2">
             <EmojiPicker selectedEmoji={newEmoji} onEmojiSelect={setNewEmoji} />
             <Input
-              className="flex-1 bg-background text-foreground border-border focus:ring-primary"
+              className="flex-1 bg-background text-foreground border-border"
               placeholder="Page title"
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
