@@ -1,10 +1,11 @@
+
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import EmojiPicker from "@/components/EmojiPicker";
 import RichTextEditor from "@/components/RichTextEditor";
-import { useRef } from "react";
+import { ChevronLeft } from "lucide-react";
 
 interface Page {
   id: string;
@@ -95,12 +96,11 @@ const Editor = () => {
         <div className="flex items-center gap-4">
           <button
             onClick={() => navigate("/home")}
-            className="text-2xl text-foreground bg-transparent border-none shadow-none outline-none focus:outline-none hover:bg-foreground/10 transition-colors px-0 py-0 flex items-center"
-            title="Back to home"
+            className="flex items-center gap-1 px-3 py-2 rounded-md hover:bg-secondary transition-colors text-foreground"
             aria-label="Back to home"
-            style={{ background: 'none', fontFamily: 'Arial, sans-serif' }}
           >
-            
+            <ChevronLeft size={18} />
+            <span>Back</span>
           </button>
           <EmojiPicker
             selectedEmoji={page.emoji}
@@ -109,15 +109,13 @@ const Editor = () => {
           <Input
             value={page.title}
             onChange={(e) => updatePage({ title: e.target.value })}
-            className="font-bold text-2xl border-none focus-visible:ring-0 px-0 bg-transparent tracking-tight leading-snug max-w-[320px] sm:max-w-xs"
+            className="font-bold text-2xl border-none focus-visible:ring-0 px-0 bg-background text-foreground tracking-tight leading-snug max-w-[320px] sm:max-w-xs placeholder:text-muted-foreground"
             placeholder="Untitled Document"
           />
         </div>
         <button
           onClick={() => setIsDark((d) => !d)}
-          className={`rounded-full p-2 text-2xl transition-colors focus:outline-none focus:ring-2 focus:ring-primary
-            ${isDark ? 'text-white hover:bg-neutral-800' : 'text-gray-700 hover:bg-gray-200'}
-          `}
+          className="rounded-full p-2 text-xl transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
           aria-label="Toggle dark mode"
         >
           {isDark ? <span className="inline-block">🌞</span> : <span className="inline-block">🌙</span>}

@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Input } from './ui/input';
+import { Button } from './ui/button';
 
 interface SignupModalProps {
   isOpen: boolean;
@@ -32,23 +33,23 @@ const SignupModal = ({ isOpen, onClose }: SignupModalProps) => {
       
       {/* Modal content */}
       <div 
-        className="relative z-10 w-full max-w-md bg-card/90 dark:bg-card/80 rounded-3xl shadow-2xl border border-border p-8 mx-4 animate-fade-in"
+        className="relative z-10 w-full max-w-md bg-card rounded-2xl shadow-xl border border-border p-8 mx-4 animate-fade-in"
         onClick={(e) => e.stopPropagation()}
       >
         <button 
           onClick={onClose}
-          className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors"
+          className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-secondary"
           aria-label="Close"
         >
           <span className="text-xl">×</span>
         </button>
 
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold mb-2 bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+          <h2 className="text-3xl font-bold mb-2 text-foreground">
             Welcome to WRDSPC
           </h2>
           <p className="text-muted-foreground">
-            Thank you for signing up. To start enjoying the benefits, let's set up your account.
+            Enter your email to start writing.
           </p>
         </div>
         
@@ -56,23 +57,23 @@ const SignupModal = ({ isOpen, onClose }: SignupModalProps) => {
           <div>
             <Input 
               type="email" 
-              placeholder="account email" 
+              placeholder="Your email address" 
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-background/50 border-input focus:border-primary"
+              className="w-full bg-background text-foreground"
             />
           </div>
           
-          <button
+          <Button
             type="submit"
-            className="w-full flex justify-center items-center gap-2 rounded-full bg-primary text-primary-foreground p-2 hover:bg-primary/90 transition-colors"
+            className="w-full flex justify-center items-center gap-2 rounded-md bg-primary text-primary-foreground p-2 hover:bg-primary/90 transition-colors"
           >
             <span>Continue</span>
             <span className="rounded-full bg-background/20 p-1 flex items-center justify-center">
               →
             </span>
-          </button>
+          </Button>
           
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
@@ -85,7 +86,7 @@ const SignupModal = ({ isOpen, onClose }: SignupModalProps) => {
           
           <button
             type="button"
-            className="w-full flex items-center justify-center gap-2 border border-border rounded-full py-2 px-4 bg-background/30 hover:bg-background/50 transition-colors"
+            className="w-full flex items-center justify-center gap-2 border border-border rounded-md py-2 px-4 bg-background text-foreground hover:bg-accent transition-colors"
           >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-5 h-5">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -94,12 +95,12 @@ const SignupModal = ({ isOpen, onClose }: SignupModalProps) => {
               <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
               <path fill="none" d="M1 1h22v22H1z" />
             </svg>
-            <span className="text-foreground font-medium">Signup with Google</span>
+            <span className="font-medium">Sign up with Google</span>
           </button>
         </form>
         
         <div className="mt-8 text-center text-xs text-muted-foreground">
-          By signing up, you agree to our <span className="underline cursor-pointer">Terms of Service</span>.
+          By signing up, you agree to our <span className="underline cursor-pointer hover:text-foreground transition-colors">Terms of Service</span>.
         </div>
       </div>
     </div>

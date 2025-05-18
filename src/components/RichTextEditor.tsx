@@ -1,3 +1,4 @@
+
 import { useRef, useEffect, useState } from "react";
 import EmojiPicker from "./EmojiPicker";
 
@@ -138,43 +139,52 @@ const RichTextEditor = ({ value, onChange }: RichTextEditorProps) => {
   };
 
   return (
-    <div className="w-full min-h-[calc(100vh-56px)] max-w-4xl mx-auto px-4 sm:px-8 pt-10 pb-16 font-sans bg-background transition-colors relative flex flex-col items-center">
-      <div className="w-full bg-background px-0 sm:px-8 py-8 min-h-[300px]">
+    <div className="w-full min-h-[calc(100vh-56px)] max-w-4xl mx-auto px-4 sm:px-8 pt-6 pb-16 font-sans bg-background transition-colors relative flex flex-col items-center">
+      <div className="w-full bg-background px-0 sm:px-4 py-4 min-h-[300px] relative">
         {(!value || value === "<br>") && (
           <div
-            className="absolute text-muted-foreground text-base pointer-events-none select-none"
-            style={{ zIndex: 1, top: '2rem', left: '2rem' }}
+            className="absolute text-muted-foreground pointer-events-none select-none"
+            style={{ top: '2rem', left: '2rem', zIndex: 1 }}
           >
             Start writing here... or type / for commands.
           </div>
         )}
         <div
           ref={editorRef}
-          className="w-full min-h-[300px] bg-transparent text-base transition-all px-0 py-0"
+          className="w-full min-h-[300px] outline-none bg-transparent text-base text-foreground transition-all"
           contentEditable
           suppressContentEditableWarning
           spellCheck={false}
           onInput={handleInput}
-          style={{ minHeight: 300, fontFamily: 'Inter, sans-serif', color: 'var(--foreground)', padding: '2rem 0 0 2rem', outline: 'none', margin: 0, border: 'none' }}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+          style={{ 
+            minHeight: 300, 
+            fontFamily: 'Inter, sans-serif', 
+            padding: '2rem',
+            outline: 'none', 
+            margin: 0, 
+            border: 'none' 
+          }}
         />
       </div>
       {(toolbar || showSlash) && (
         <div
-          className="absolute z-50 flex flex-col gap-3 bg-white/95 dark:bg-neutral-800/95 rounded-2xl shadow-xl p-4 border border-gray-200 dark:border-neutral-700 transition-all"
+          className="absolute z-50 flex flex-col gap-2 bg-card rounded-lg shadow-lg p-2 border border-border transition-all"
           style={{ top: (toolbar?.top ?? 60), left: (toolbar?.left ?? 32), minWidth: 220, fontFamily: 'Inter, sans-serif' }}
         >
           {TOOLBAR_OPTIONS.map(opt => (
             <button
               key={opt.id}
-              className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-700 transition-colors transform-gpu hover:scale-[1.04]"
+              className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-accent transition-colors"
               onMouseDown={e => { e.preventDefault(); format(opt.id); }}
               type="button"
               style={{ fontFamily: 'Inter, sans-serif' }}
             >
-              <span className="inline-flex items-center justify-center w-8 h-8 rounded-md bg-gray-100 dark:bg-neutral-700 font-bold text-lg text-gray-800 dark:text-gray-100 transition-colors">
+              <span className="inline-flex items-center justify-center w-8 h-8 rounded-md bg-secondary font-bold text-lg text-foreground">
                 {opt.icon}
               </span>
-              <span className="text-gray-800 dark:text-gray-100 text-base font-medium transition-colors">{opt.label}</span>
+              <span className="text-foreground text-base font-medium">{opt.label}</span>
             </button>
           ))}
         </div>
@@ -183,4 +193,4 @@ const RichTextEditor = ({ value, onChange }: RichTextEditorProps) => {
   );
 };
 
-export default RichTextEditor; 
+export default RichTextEditor;

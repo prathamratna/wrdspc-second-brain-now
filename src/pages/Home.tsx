@@ -1,8 +1,10 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import EmojiPicker from "@/components/EmojiPicker";
+import { Input } from "@/components/ui/input";
 
 interface Page {
   id: string;
@@ -68,11 +70,7 @@ const Home = () => {
         <h1 className="font-mono text-2xl font-bold select-none tracking-wide h-12 flex items-center text-foreground">Your Pages</h1>
         <button
           onClick={() => setIsDark((d) => !d)}
-          className={`rounded-full p-2 text-2xl transition-colors focus:outline-none focus:ring-2 focus:ring-primary
-            ${isDark
-              ? 'text-white hover:bg-neutral-800'
-              : 'text-gray-700 hover:bg-gray-200'
-            }`}
+          className="rounded-full p-2 text-xl transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
           aria-label="Toggle dark mode"
         >
           {isDark ? <span className="inline-block">🌞</span> : <span className="inline-block">🌙</span>}
@@ -88,8 +86,8 @@ const Home = () => {
         {showNew && (
           <Card className="mb-6 p-4 flex items-center gap-2">
             <EmojiPicker selectedEmoji={newEmoji} onEmojiSelect={setNewEmoji} />
-            <input
-              className="border rounded px-2 py-1 flex-1"
+            <Input
+              className="flex-1 bg-background text-foreground border-border focus:ring-primary"
               placeholder="Page title"
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
@@ -109,11 +107,11 @@ const Home = () => {
           {pages.map((page) => (
             <Card
               key={page.id}
-              className="flex items-center gap-3 p-4 cursor-pointer hover:bg-accent"
+              className="flex items-center gap-3 p-4 cursor-pointer hover:bg-accent transition-colors"
               onClick={() => navigate(`/page/${page.id}`)}
             >
               <span className="text-2xl">{page.emoji}</span>
-              <span className="font-medium">{page.title}</span>
+              <span className="font-medium text-foreground">{page.title}</span>
             </Card>
           ))}
         </div>
@@ -122,4 +120,4 @@ const Home = () => {
   );
 };
 
-export default Home; 
+export default Home;
