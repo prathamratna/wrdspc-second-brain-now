@@ -65,18 +65,44 @@ html[dir="rtl"] .editor-content * {
   caret-color: auto !important;
 }
 
-.editor-wrapper {
+/* Improved editor container styling */
+.editor-container {
   position: relative;
+  height: 100%;
 }
 
-.editor-placeholder {
-  position: absolute;
-  z-index: 0;
+/* Hide scrollbar but allow scrolling */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
-.editor-content {
-  position: relative;
-  z-index: 1;
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Enhanced mobile support */
+@media (max-width: 640px) {
+  .editor-content h1 {
+    font-size: 1.75rem !important;
+  }
+  
+  .editor-content h2 {
+    font-size: 1.5rem !important;
+  }
+  
+  .editor-content h3 {
+    font-size: 1.25rem !important;
+  }
+}
+
+/* Light mode text visibility improvements */
+.dark .editor-container {
+  color: hsl(var(--foreground));
+}
+
+:root:not(.dark) .editor-container {
+  color: hsl(var(--foreground));
 }
 
 /* Fix for webkit browsers */
@@ -84,5 +110,12 @@ html[dir="rtl"] .editor-content * {
   [contenteditable="true"] {
     -webkit-user-modify: read-write !important;
     -webkit-user-select: text !important;
+  }
+}
+
+/* Prevent zoom on mobile when typing */
+@media (max-width: 768px) {
+  input, textarea, [contenteditable="true"] {
+    font-size: 16px !important;
   }
 }

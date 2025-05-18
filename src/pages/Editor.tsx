@@ -92,17 +92,17 @@ const Editor = () => {
 
   return (
     <div className="min-h-screen w-full bg-background font-sans transition-colors relative">
-      <header className="flex items-center justify-between px-8 py-3 border-b border-border bg-background sticky top-0 z-10">
-        <div className="flex items-center gap-4">
+      <header className="flex items-center justify-between px-4 sm:px-8 py-3 sticky top-0 z-10 bg-background">
+        <div className="flex items-center gap-3 sm:gap-4 overflow-x-auto no-scrollbar">
           <Button
+            onClick={() => navigate("/home")}
             variant="ghost"
             size="sm"
-            onClick={() => navigate("/home")}
             className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
             aria-label="Back to home"
           >
             <ChevronLeft size={18} />
-            <span>Back</span>
+            <span className="hidden sm:inline">Back</span>
           </Button>
           <EmojiPicker
             selectedEmoji={page.emoji}
@@ -111,7 +111,7 @@ const Editor = () => {
           <Input
             value={page.title}
             onChange={(e) => updatePage({ title: e.target.value })}
-            className="font-bold text-xl border-none focus-visible:ring-0 px-0 bg-background text-foreground tracking-tight leading-snug max-w-[320px] sm:max-w-xs placeholder:text-muted-foreground"
+            className="font-bold text-lg sm:text-xl border-none focus-visible:ring-0 px-0 bg-background text-foreground tracking-tight leading-snug max-w-[140px] sm:max-w-[320px] placeholder:text-muted-foreground"
             placeholder="Untitled Document"
           />
         </div>

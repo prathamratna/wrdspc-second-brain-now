@@ -36,10 +36,13 @@ const RichTextEditor = ({ value, onChange }: RichTextEditorProps) => {
   const [toolbar, setToolbar] = useState<{ top: number; left: number } | null>(null);
   const [showSlash, setShowSlash] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
+  const [hasContent, setHasContent] = useState(false);
 
   useEffect(() => {
     if (editorRef.current && editorRef.current.innerHTML !== value) {
       editorRef.current.innerHTML = value;
+      // Check if there's actual content
+      setHasContent(value && value !== "<br>" && value !== "");
     }
   }, [value]);
 
@@ -59,7 +62,11 @@ const RichTextEditor = ({ value, onChange }: RichTextEditorProps) => {
 
   const handleInput = (e?: any) => {
     if (editorRef.current) {
-      onChange(editorRef.current.innerHTML);
+      const content = editorRef.current.innerHTML;
+      onChange(content);
+      
+      // Check if there's actual content to hide placeholder
+      setHasContent(content && content !== "<br>" && content !== "");
       
       // Show slash menu if last char is '/'
       const text = editorRef.current.innerText;
@@ -159,39 +166,47 @@ const RichTextEditor = ({ value, onChange }: RichTextEditorProps) => {
     handleInput();
     setToolbar(null);
     setShowSlash(false);
+    setHasContent(true); // After formatting, we definitely have content
   };
 
   return (
-    <div className="w-full min-h-[calc(100vh-56px)] max-w-4xl mx-auto px-4 sm:px-8 pt-6 pb-16 font-sans bg-background transition-colors relative flex flex-col items-center">
-      <div className="w-full bg-background px-0 sm:px-4 py-4 min-h-[300px] relative">
-        {(!value || value === "<br>") && (
+    <div className="w-full min-h-[calc(100vh-56px)] px-4 sm:px-8 py-6 font-sans transition-colors relative">
+      <div className="editor-container w-full max-w-4xl mx-auto h-full relative">
+        <div className="relative w-full min-h-[calc(100vh-100px)]">
+          {(!hasContent) && (
+            <div
+              className="absolute pointer-events-none text-muted-foreground"
+              style={{ 
+                top: '0.5rem', 
+                left: '0.5rem', 
+                zIndex: 1 
+              }}
+            >
+              Start writing here... or type / for commands.
+            </div>
+          )}
           <div
-            className="absolute pointer-events-none select-none text-muted-foreground"
-            style={{ top: '2rem', left: '2rem', zIndex: 1 }}
-          >
-            Start writing here... or type / for commands.
-          </div>
-        )}
-        <div
-          ref={editorRef}
-          className="w-full min-h-[300px] outline-none bg-transparent text-foreground transition-all editor-content"
-          contentEditable
-          suppressContentEditableWarning
-          spellCheck={false}
-          onInput={handleInput}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
-          style={{ 
-            minHeight: 300, 
-            fontFamily: 'Inter, sans-serif', 
-            padding: '2rem',
-            outline: 'none', 
-            margin: 0, 
-            border: 'none',
-            lineHeight: 1.5
-          }}
-        />
+            ref={editorRef}
+            className="w-full h-full outline-none bg-transparent text-foreground transition-all editor-content"
+            contentEditable
+            suppressContentEditableWarning
+            spellCheck={false}
+            onInput={handleInput}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
+            style={{ 
+              minHeight: "calc(100vh - 100px)",
+              fontFamily: 'Inter, sans-serif', 
+              padding: '0.5rem',
+              outline: 'none', 
+              margin: 0, 
+              border: 'none',
+              lineHeight: 1.5
+            }}
+          />
+        </div>
       </div>
+
       {(toolbar || showSlash) && (
         <div
           className="absolute z-50 flex flex-col gap-1 bg-card rounded-lg shadow-lg p-1.5 border border-border transition-all"
