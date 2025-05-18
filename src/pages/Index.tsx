@@ -1,5 +1,7 @@
+
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import SignupModal from '../components/SignupModal';
 
 const Index = () => {
   const [isDark, setIsDark] = useState(() => {
@@ -11,6 +13,7 @@ const Index = () => {
     }
     return true;
   });
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -22,6 +25,10 @@ const Index = () => {
       localStorage.setItem('theme', 'light');
     }
   }, [isDark]);
+
+  const handleStartWriting = () => {
+    setIsModalOpen(true);
+  };
 
   return (
     <div className="min-h-screen flex flex-col font-sans bg-background transition-colors">
@@ -45,7 +52,7 @@ const Index = () => {
           A writing space that's lightning fast, distraction-free, and built for people who hate setting up Notion.
         </p>
         <button
-          onClick={() => navigate('/home')}
+          onClick={handleStartWriting}
           className="px-10 py-4 rounded-2xl bg-primary text-primary-foreground text-xl font-semibold shadow-md hover:bg-primary/90 transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
         >
           Start Writing Now
@@ -54,6 +61,11 @@ const Index = () => {
       <footer className="py-6 px-4 text-center text-sm text-muted-foreground">
         © 2025 WRDSPC. All rights reserved.
       </footer>
+      
+      <SignupModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+      />
     </div>
   );
 };
