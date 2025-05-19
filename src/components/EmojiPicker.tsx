@@ -1,3 +1,4 @@
+
 import { useRef, useState, useEffect } from "react";
 
 const EMOJIS = [
@@ -39,7 +40,7 @@ export default function EmojiPicker({ onEmojiSelect, selectedEmoji }: { onEmojiS
     <div className="relative inline-block" style={{ fontFamily: 'Inter, sans-serif' }}>
       <button
         ref={iconRef}
-        className="text-2xl bg-transparent border-none outline-none p-0 m-0"
+        className="text-2xl bg-transparent border-none outline-none p-0 m-0 hover:opacity-80 transition-opacity"
         onClick={() => setOpen((v) => !v)}
         aria-label="Select emoji"
         type="button"
@@ -49,15 +50,14 @@ export default function EmojiPicker({ onEmojiSelect, selectedEmoji }: { onEmojiS
       {open && (
         <div
           ref={menuRef}
-          className="absolute left-0 mt-3 p-0 z-50"
-          style={{ minWidth: 240, maxHeight: 240, overflowY: "auto", background: "transparent", boxShadow: "none", border: "none", fontFamily: 'Inter, sans-serif' }}
+          className="absolute left-0 mt-3 z-50 bg-background/80 backdrop-blur-md border border-border rounded-lg shadow-lg p-3"
+          style={{ minWidth: 240, maxHeight: 240 }}
         >
-          <div className="grid grid-cols-5 gap-2">
+          <div className="grid grid-cols-5 gap-3 no-scrollbar overflow-y-auto" style={{ maxHeight: 200 }}>
             {EMOJIS.map((emoji) => (
               <button
                 key={emoji}
-                className="text-2xl bg-transparent border-none outline-none p-0 m-0"
-                style={{ cursor: "pointer" }}
+                className="text-2xl bg-transparent hover:bg-accent p-1.5 rounded-md transition-colors flex items-center justify-center"
                 onClick={() => {
                   onEmojiSelect(emoji);
                   setOpen(false);

@@ -96,6 +96,21 @@ const Editor = () => {
     updatePage({ tags });
   };
 
+  const handleKeyDown = (e: KeyboardEvent) => {
+    // Save with Ctrl+S or Cmd+S
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+      e.preventDefault();
+      setToastMessage("Changes saved");
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   if (notFound) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background text-foreground">
@@ -111,7 +126,7 @@ const Editor = () => {
 
   return (
     <div className="min-h-screen w-full bg-background text-foreground font-sans transition-colors relative">
-      <header className="flex items-center justify-between px-4 sm:px-8 py-3 sticky top-0 z-10 bg-background">
+      <header className="flex items-center justify-between px-4 sm:px-8 py-3 sticky top-0 z-10 bg-background/80 backdrop-blur-sm">
         <div className="flex items-center gap-3 sm:gap-4 overflow-x-auto no-scrollbar">
           <Button
             onClick={() => navigate("/home")}
@@ -153,7 +168,7 @@ const Editor = () => {
         />
       </div>
       {showToast && (
-        <div className="fixed bottom-6 right-6 z-50 bg-card border border-border rounded-xl shadow-lg px-6 py-4 flex items-center gap-3 text-foreground animate-in fade-in">
+        <div className="fixed bottom-6 right-6 z-50 bg-card/80 backdrop-blur-sm border border-border rounded-xl shadow-lg px-6 py-4 flex items-center gap-3 text-foreground animate-in fade-in">
           <span className="font-medium">{toastMessage}</span>
         </div>
       )}

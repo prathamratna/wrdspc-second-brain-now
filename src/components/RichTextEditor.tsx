@@ -1,12 +1,13 @@
 
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useCallback } from "react";
 import { 
   AlignLeft, Bold, Italic, Underline, Code, Link, Image, 
   Heading1, Heading2, Heading3, Heading4, List, ListOrdered, 
-  CheckSquare, Search 
+  CheckSquare, Search, Text
 } from "lucide-react";
 
 const TOOLBAR_OPTIONS = [
+  { id: "normal", label: "Normal Text", icon: <Text size={16} />, style: { fontSize: 16, fontWeight: 'normal' } },
   { id: "h1", label: "Heading 1", icon: <Heading1 size={16} />, style: { fontSize: 32, fontWeight: 700 } },
   { id: "h2", label: "Heading 2", icon: <Heading2 size={16} />, style: { fontSize: 24, fontWeight: 700 } },
   { id: "h3", label: "Heading 3", icon: <Heading3 size={16} />, style: { fontSize: 18, fontWeight: 700 } },
@@ -55,6 +56,7 @@ const RichTextEditor = ({ value, onChange, tags = [], onTagsChange }: RichTextEd
   const [currentTags, setCurrentTags] = useState<string[]>(tags);
   const [newTag, setNewTag] = useState("");
   const [showTagInput, setShowTagInput] = useState(false);
+  const [showMinimalToolbar, setShowMinimalToolbar] = useState(false);
 
   useEffect(() => {
     if (editorRef.current && editorRef.current.innerHTML !== value) {
@@ -84,6 +86,97 @@ const RichTextEditor = ({ value, onChange, tags = [], onTagsChange }: RichTextEd
     return () => document.removeEventListener("selectionchange", handler);
   }, []);
 
+  // Add keyboard shortcut handling
+  useEffect(() => {
+    if (!editorRef.current) return;
+    
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Handle Enter key to reset formatting after headings
+      if (e.key === 'Enter') {
+        const selection = window.getSelection();
+        if (!selection) return;
+        
+        const range = selection.getRangeAt(0);
+        const node = range.startContainer;
+        
+        // Check if we're in a heading element
+        let headingElement = null;
+        let currentNode: Node | null = node;
+        
+        while (currentNode && currentNode !== editorRef.current) {
+          if (currentNode.nodeName.match(/^H[1-6]$/)) {
+            headingElement = currentNode;
+            break;
+          }
+          currentNode = currentNode.parentNode;
+        }
+        
+        if (headingElement) {
+          // Let the default Enter behavior happen first
+          setTimeout(() => {
+            // After the browser has created a new line, apply normal formatting
+            document.execCommand('formatBlock', false, 'p');
+          }, 0);
+        }
+      }
+      
+      // Keyboard shortcuts for common formatting
+      if (e.ctrlKey || e.metaKey) {
+        switch (e.key.toLowerCase()) {
+          case 'b':
+            e.preventDefault();
+            format('bold');
+            break;
+          case 'i':
+            e.preventDefault();
+            format('italic');
+            break;
+          case 'u':
+            e.preventDefault();
+            format('underline');
+            break;
+          case '1':
+            if (e.altKey) {
+              e.preventDefault();
+              format('h1');
+            }
+            break;
+          case '2':
+            if (e.altKey) {
+              e.preventDefault();
+              format('h2');
+            }
+            break;
+          case '3':
+            if (e.altKey) {
+              e.preventDefault();
+              format('h3');
+            }
+            break;
+          case '4':
+            if (e.altKey) {
+              e.preventDefault();
+              format('h4');
+            }
+            break;
+        }
+      }
+      
+      // Show minimal toolbar when user types content
+      setShowMinimalToolbar(true);
+      
+      // Reset formatting when content is empty
+      if (editorRef.current && (editorRef.current.innerText.trim() === '' || e.key === 'Escape')) {
+        document.execCommand('formatBlock', false, 'p');
+      }
+    };
+    
+    editorRef.current.addEventListener('keydown', handleKeyDown);
+    return () => {
+      editorRef.current?.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
   const handleInput = (e?: any) => {
     if (editorRef.current) {
       const content = editorRef.current.innerHTML;
@@ -99,6 +192,11 @@ const RichTextEditor = ({ value, onChange, tags = [], onTagsChange }: RichTextEd
       
       if (endsWithSlash) {
         setToolbar(getToolbarPosition());
+      }
+      
+      // Reset to normal text when everything is deleted
+      if (content === "" || content === "<br>") {
+        document.execCommand('formatBlock', false, 'p');
       }
     }
   };
@@ -187,6 +285,9 @@ const RichTextEditor = ({ value, onChange, tags = [], onTagsChange }: RichTextEd
     
     // Apply formatting
     switch (cmd) {
+      case "normal":
+        document.execCommand("formatBlock", false, "p");
+        break;
       case "link":
         setShowLinkDialog(true);
         break;
@@ -318,6 +419,35 @@ const RichTextEditor = ({ value, onChange, tags = [], onTagsChange }: RichTextEd
       </div>
 
       <div className="editor-container w-full max-w-4xl mx-auto h-full relative">
+        {/* Persistent minimal toolbar */}
+        {showMinimalToolbar && (
+          <div className="sticky top-16 z-20 bg-card/80 backdrop-blur-sm border border-border rounded-lg shadow-lg p-1.5 mb-4 flex flex-wrap gap-1 transition-all">
+            {TOOLBAR_OPTIONS.slice(0, 5).map(opt => (
+              <button
+                key={opt.id}
+                className="flex items-center justify-center w-8 h-8 rounded-md hover:bg-accent transition-colors"
+                onClick={() => format(opt.id)}
+                type="button"
+                title={opt.label}
+              >
+                {opt.icon}
+              </button>
+            ))}
+            <div className="h-6 border-r border-border mx-1"></div>
+            {TOOLBAR_OPTIONS.slice(5, 8).map(opt => (
+              <button
+                key={opt.id}
+                className="flex items-center justify-center w-8 h-8 rounded-md hover:bg-accent transition-colors"
+                onClick={() => format(opt.id)}
+                type="button"
+                title={opt.label}
+              >
+                {opt.icon}
+              </button>
+            ))}
+          </div>
+        )}
+        
         <div className="relative w-full min-h-[calc(100vh-100px)]">
           {(!hasContent) && (
             <div
@@ -355,7 +485,7 @@ const RichTextEditor = ({ value, onChange, tags = [], onTagsChange }: RichTextEd
 
       {(toolbar || showSlash) && (
         <div
-          className="absolute z-50 flex flex-col gap-1 bg-card rounded-lg shadow-lg p-1.5 border border-border transition-all"
+          className="absolute z-50 flex flex-col gap-1 bg-card/95 backdrop-blur-sm rounded-lg shadow-lg p-1.5 border border-border transition-all"
           style={{ top: (toolbar?.top ?? 60), left: (toolbar?.left ?? 32), minWidth: 220, fontFamily: 'Inter, sans-serif' }}
         >
           {TOOLBAR_OPTIONS.map(opt => (
