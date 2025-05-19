@@ -91,7 +91,7 @@ const Editor = () => {
   if (!page) return null;
 
   return (
-    <div className="min-h-screen w-full bg-background font-sans transition-colors relative">
+    <div className="min-h-screen w-full bg-background text-foreground font-sans transition-colors relative">
       <header className="flex items-center justify-between px-4 sm:px-8 py-3 sticky top-0 z-10 bg-background">
         <div className="flex items-center gap-3 sm:gap-4 overflow-x-auto no-scrollbar">
           <Button
@@ -123,10 +123,12 @@ const Editor = () => {
           {isDark ? <span className="inline-block">🌞</span> : <span className="inline-block">🌙</span>}
         </button>
       </header>
-      <RichTextEditor
-        value={page.content || ""}
-        onChange={(content: string) => updatePage({ content })}
-      />
+      <div className="px-4 sm:px-8 pt-4">
+        <RichTextEditor
+          value={page.content || ""}
+          onChange={(content: string) => updatePage({ content })}
+        />
+      </div>
       {showToast && (
         <div className="fixed bottom-6 right-6 z-50 bg-card border border-border rounded-xl shadow-lg px-6 py-4 flex items-center gap-3 text-foreground animate-in">
           <span className="text-xl">✔️</span>

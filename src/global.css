@@ -6,7 +6,6 @@
   text-align: left !important;
   unicode-bidi: plaintext !important;
   writing-mode: horizontal-tb !important;
-  white-space: pre-wrap !important;
   overflow-wrap: break-word !important;
   word-break: break-word !important;
 }
@@ -21,11 +20,16 @@
   white-space: pre-wrap !important;
 }
 
-/* Ensure LTR for placeholder text */
+/* Improved editor placeholder styling */
 .editor-placeholder {
   direction: ltr !important;
   text-align: left !important;
   unicode-bidi: plaintext !important;
+  position: absolute !important;
+  color: hsl(var(--muted-foreground)) !important;
+  pointer-events: none !important;
+  user-select: none !important;
+  will-change: transform !important;
 }
 
 /* Prevent any RTL inheritance */
@@ -57,18 +61,20 @@ html[dir="rtl"] .editor-content * {
 /* Ensure caret visibility */
 [contenteditable="true"] {
   caret-color: auto !important;
-}
-
-/* Ensure browser focus behavior */
-[contenteditable="true"]:focus {
   outline: none !important;
-  caret-color: auto !important;
+  position: relative !important;
 }
 
 /* Improved editor container styling */
 .editor-container {
-  position: relative;
-  height: 100%;
+  position: relative !important;
+  height: 100% !important;
+}
+
+.editor-input {
+  min-height: calc(100vh - 120px) !important;
+  padding-top: 0.5rem !important;
+  outline: none !important;
 }
 
 /* Hide scrollbar but allow scrolling */
@@ -96,13 +102,13 @@ html[dir="rtl"] .editor-content * {
   }
 }
 
-/* Light mode text visibility improvements */
-.dark .editor-container {
-  color: hsl(var(--foreground));
+/* Visibility improvements for both modes */
+.dark .editor-input {
+  color: hsl(var(--foreground)) !important;
 }
 
-:root:not(.dark) .editor-container {
-  color: hsl(var(--foreground));
+:root:not(.dark) .editor-input {
+  color: hsl(var(--foreground)) !important;
 }
 
 /* Fix for webkit browsers */
