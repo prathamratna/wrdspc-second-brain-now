@@ -154,7 +154,6 @@ const Editor = () => {
       </div>
       {showToast && (
         <div className="fixed bottom-6 right-6 z-50 bg-card border border-border rounded-xl shadow-lg px-6 py-4 flex items-center gap-3 text-foreground animate-in fade-in">
-          <span className="text-xl">✔️</span>
           <span className="font-medium">{toastMessage}</span>
         </div>
       )}
