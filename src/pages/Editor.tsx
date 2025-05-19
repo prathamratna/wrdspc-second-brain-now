@@ -5,13 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import EmojiPicker from "@/components/EmojiPicker";
 import RichTextEditor from "@/components/RichTextEditor";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Search } from "lucide-react";
 
 interface Page {
   id: string;
   title: string;
   emoji: string;
   content?: string;
+  tags?: string[];
+  createdAt: number;
+  updatedAt: number;
 }
 
 const getPages = (): Page[] => {
@@ -38,6 +41,7 @@ const Editor = () => {
     return true;
   });
   const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("Welcome to WRDSPC!");
 
   useEffect(() => {
     const pages = getPages();
@@ -67,19 +71,34 @@ const Editor = () => {
 
   const updatePage = (updates: Partial<Page>) => {
     if (!page) return;
-    const updated = { ...page, ...updates };
+
+    const now = Date.now();
+    const updated = { 
+      ...page, 
+      ...updates,
+      updatedAt: now 
+    };
+    
     setPage(updated);
+    
     const pages = getPages();
     const idx = pages.findIndex((p) => p.id === page.id);
     if (idx !== -1) {
       pages[idx] = updated;
       savePages(pages);
+      setToastMessage("Changes saved");
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
     }
+  };
+
+  const handleTagsChange = (tags: string[]) => {
+    updatePage({ tags });
   };
 
   if (notFound) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-background text-foreground">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">Page not found</h1>
           <Button onClick={() => navigate("/home")}>Back to Home</Button>
@@ -115,24 +134,28 @@ const Editor = () => {
             placeholder="Untitled Document"
           />
         </div>
-        <button
-          onClick={() => setIsDark((d) => !d)}
-          className="rounded-full p-2 text-xl transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
-          aria-label="Toggle dark mode"
-        >
-          {isDark ? <span className="inline-block">🌞</span> : <span className="inline-block">🌙</span>}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setIsDark((d) => !d)}
+            className="rounded-full p-2 text-xl transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
+            aria-label="Toggle dark mode"
+          >
+            {isDark ? <span className="inline-block">🌞</span> : <span className="inline-block">🌙</span>}
+          </button>
+        </div>
       </header>
       <div className="px-4 sm:px-8 pt-4">
         <RichTextEditor
           value={page.content || ""}
           onChange={(content: string) => updatePage({ content })}
+          tags={page.tags || []}
+          onTagsChange={handleTagsChange}
         />
       </div>
       {showToast && (
-        <div className="fixed bottom-6 right-6 z-50 bg-card border border-border rounded-xl shadow-lg px-6 py-4 flex items-center gap-3 text-foreground animate-in">
+        <div className="fixed bottom-6 right-6 z-50 bg-card border border-border rounded-xl shadow-lg px-6 py-4 flex items-center gap-3 text-foreground animate-in fade-in">
           <span className="text-xl">✔️</span>
-          <span className="font-medium">Welcome to WRDSPC!</span>
+          <span className="font-medium">{toastMessage}</span>
         </div>
       )}
     </div>

@@ -5,17 +5,31 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import EmojiPicker from "@/components/EmojiPicker";
 import { Input } from "@/components/ui/input";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, Search, Tag } from "lucide-react";
 
 interface Page {
   id: string;
   title: string;
   emoji: string;
+  content?: string;
+  tags?: string[];
+  createdAt: number;
+  updatedAt: number;
 }
 
 const getPages = (): Page[] => {
   const data = localStorage.getItem("pages");
-  return data ? JSON.parse(data) : [];
+  if (!data) return [];
+  
+  const pages = JSON.parse(data);
+  
+  // Ensure all pages have createdAt and updatedAt
+  return pages.map((page: Page) => ({
+    ...page,
+    createdAt: page.createdAt || Date.now(),
+    updatedAt: page.updatedAt || Date.now(),
+    tags: page.tags || []
+  }));
 };
 
 const savePages = (pages: Page[]) => {
@@ -27,6 +41,8 @@ const Home = () => {
   const [showNew, setShowNew] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newEmoji, setNewEmoji] = useState("📝");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [isDark, setIsDark] = useState(() => {
     if (typeof window !== 'undefined') {
       if (localStorage.getItem('theme')) {
@@ -54,8 +70,19 @@ const Home = () => {
 
   const handleCreate = () => {
     if (!newTitle.trim()) return;
-    const id = Date.now().toString();
-    const page = { id, title: newTitle, emoji: newEmoji };
+    
+    const now = Date.now();
+    const id = now.toString();
+    
+    const page = { 
+      id, 
+      title: newTitle, 
+      emoji: newEmoji,
+      tags: [],
+      createdAt: now,
+      updatedAt: now
+    };
+    
     const updated = [...pages, page];
     setPages(updated);
     savePages(updated);
@@ -64,6 +91,26 @@ const Home = () => {
     setNewEmoji("📝");
     navigate(`/page/${id}`);
   };
+
+  // Get all unique tags from all pages
+  const allTags = Array.from(
+    new Set(pages.flatMap(page => page.tags || []))
+  ).sort();
+
+  // Filter pages based on search query and selected tag
+  const filteredPages = pages.filter(page => {
+    const matchesSearch = !searchQuery || 
+      page.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (page.content && page.content.toLowerCase().includes(searchQuery.toLowerCase()));
+    
+    const matchesTag = !selectedTag || 
+      (page.tags && page.tags.includes(selectedTag));
+    
+    return matchesSearch && matchesTag;
+  });
+
+  // Sort pages by updated date (newest first)
+  const sortedPages = [...filteredPages].sort((a, b) => b.updatedAt - a.updatedAt);
 
   return (
     <div className="w-full min-h-screen bg-background font-sans transition-colors" style={{ paddingTop: '2.5vh' }}>
@@ -78,13 +125,55 @@ const Home = () => {
         </button>
       </header>
       <div className="max-w-xl mx-auto px-4">
-        <div className="flex justify-between items-center mb-6">
-          <span />
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
+          <div className="relative w-full max-w-xs">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={16} />
+            <Input
+              placeholder="Search pages..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 pr-4 w-full bg-background text-foreground"
+            />
+          </div>
           <Button onClick={() => setShowNew((v) => !v)} className="flex items-center gap-2">
             <PlusCircle size={18} />
             New Page
           </Button>
         </div>
+        
+        {/* Tags filter */}
+        {allTags.length > 0 && (
+          <div className="mb-6">
+            <div className="flex flex-wrap gap-2 items-center">
+              <span className="text-sm text-muted-foreground flex items-center gap-1">
+                <Tag size={14} />
+                <span>Filter:</span>
+              </span>
+              
+              <div
+                className={`text-sm px-2 py-1 rounded-md cursor-pointer transition-colors ${
+                  !selectedTag ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground hover:bg-accent'
+                }`}
+                onClick={() => setSelectedTag(null)}
+              >
+                All
+              </div>
+              
+              {allTags.map(tag => (
+                <div 
+                  key={tag} 
+                  className={`text-sm px-2 py-1 rounded-md cursor-pointer transition-colors ${
+                    selectedTag === tag ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground hover:bg-accent'
+                  }`}
+                  onClick={() => setSelectedTag(tag === selectedTag ? null : tag)}
+                >
+                  #{tag}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        
         {showNew && (
           <Card className="mb-6 p-4 flex items-center gap-2">
             <EmojiPicker selectedEmoji={newEmoji} onEmojiSelect={setNewEmoji} />
@@ -94,6 +183,9 @@ const Home = () => {
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
               autoFocus
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleCreate();
+              }}
             />
             <Button onClick={handleCreate} disabled={!newTitle.trim()}>
               Create
@@ -101,19 +193,51 @@ const Home = () => {
           </Card>
         )}
         <div className="space-y-2">
-          {pages.length === 0 && (
+          {sortedPages.length === 0 && searchQuery && (
+            <div className="text-muted-foreground text-center py-8">
+              No pages match your search.
+            </div>
+          )}
+          {sortedPages.length === 0 && !searchQuery && (
             <div className="text-muted-foreground text-center py-8">
               No pages yet. Click "New Page" to get started.
             </div>
           )}
-          {pages.map((page) => (
+          {sortedPages.map((page) => (
             <Card
               key={page.id}
-              className="flex items-center gap-3 p-4 cursor-pointer hover:bg-accent transition-colors"
+              className="p-4 cursor-pointer hover:bg-accent transition-colors"
               onClick={() => navigate(`/page/${page.id}`)}
             >
-              <span className="text-2xl">{page.emoji}</span>
-              <span className="font-medium text-foreground">{page.title}</span>
+              <div className="flex items-center gap-3 mb-2">
+                <span className="text-2xl">{page.emoji}</span>
+                <span className="font-medium text-foreground">{page.title}</span>
+              </div>
+              
+              {/* Show tags if they exist */}
+              {page.tags && page.tags.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {page.tags.map(tag => (
+                    <span 
+                      key={tag} 
+                      className="text-xs bg-secondary text-secondary-foreground px-1.5 py-0.5 rounded"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedTag(tag === selectedTag ? null : tag);
+                      }}
+                    >
+                      #{tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+              
+              {/* Show updated at date */}
+              <div className="text-xs text-muted-foreground mt-1">
+                {new Date(page.updatedAt).toLocaleDateString()} 
+                {" • "}
+                {new Date(page.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </div>
             </Card>
           ))}
         </div>

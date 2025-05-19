@@ -11,14 +11,37 @@ interface SignupModalProps {
 
 const SignupModal = ({ isOpen, onClose }: SignupModalProps) => {
   const [email, setEmail] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
+
+  const validateEmail = (email: string) => {
+    const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(String(email).toLowerCase());
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (email.trim()) {
+    setError('');
+    
+    if (!email.trim()) {
+      setError('Email is required');
+      return;
+    }
+    
+    if (!validateEmail(email)) {
+      setError('Please enter a valid email address');
+      return;
+    }
+    
+    setIsSubmitting(true);
+    
+    // Simulate a delay for better UX
+    setTimeout(() => {
       localStorage.setItem('user-email', email);
       navigate('/home');
-    }
+      setIsSubmitting(false);
+    }, 1000);
   };
 
   if (!isOpen) return null;
@@ -53,26 +76,45 @@ const SignupModal = ({ isOpen, onClose }: SignupModalProps) => {
           </p>
         </div>
         
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Input 
               type="email" 
               placeholder="Your email address" 
               required
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-background text-foreground"
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setError('');
+              }}
+              className={`w-full bg-background text-foreground ${error ? 'border-destructive' : ''}`}
             />
+            {error && (
+              <p className="text-destructive text-sm mt-1">{error}</p>
+            )}
           </div>
           
           <Button
             type="submit"
             className="w-full flex justify-center items-center gap-2 rounded-md bg-primary text-primary-foreground p-2 hover:bg-primary/90 transition-colors"
+            disabled={isSubmitting}
           >
-            <span>Continue</span>
-            <span className="rounded-full bg-background/20 p-1 flex items-center justify-center">
-              →
-            </span>
+            {isSubmitting ? (
+              <span className="flex items-center gap-2">
+                <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Processing...</span>
+              </span>
+            ) : (
+              <>
+                <span>Continue</span>
+                <span className="rounded-full bg-background/20 p-1 flex items-center justify-center">
+                  →
+                </span>
+              </>
+            )}
           </Button>
           
           <div className="relative my-6">
