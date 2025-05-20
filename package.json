@@ -10,6 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@capacitor/android": "^7.2.0",
+    "@capacitor/core": "^7.2.0",
     "@types/node": "^22.15.18",
     "clsx": "^2.1.1",
     "lovable-tagger": "^1.1.8",
