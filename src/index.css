@@ -185,3 +185,130 @@
 .backdrop-blur-enter {
   animation: fade-in 0.2s ease-out forwards;
 }
+
+/* Tiptap Editor Styles */
+.ProseMirror {
+  padding: 1rem;
+  min-height: 200px; /* Adjust as needed */
+  outline: none;
+  line-height: 1.6;
+  /* Basic scrollability for the editor itself if its content overflows its container */
+  /* overflow-y: auto; This might be better on the EditorContent wrapper */
+}
+
+.ProseMirror p {
+  margin-bottom: 0.75rem;
+}
+
+.ProseMirror h1,
+.ProseMirror h2,
+.ProseMirror h3 {
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Placeholder Styling */
+.ProseMirror .ProseMirror-placeholder {
+  color: #adb5bd;
+  pointer-events: none;
+  height: 0;
+  /* Visibility is often handled by Tiptap's extension */
+}
+
+/* Slash Command Popup Styling */
+.slash-command-popup {
+  background: white;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  padding: 0.5rem;
+  overflow: hidden;
+  z-index: 100; /* Ensure it's above other elements */
+}
+
+.dark .slash-command-popup { /* Dark mode styling for slash command */
+  background: hsl(var(--popover)); /* Use popover background from theme */
+  border-color: hsl(var(--border));
+}
+
+.slash-command-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: hsl(var(--foreground)); /* Use theme foreground color */
+}
+
+.slash-command-item:hover,
+.slash-command-item.is-selected {
+  background-color: hsl(var(--secondary)); /* Use secondary background from theme */
+}
+
+.dark .slash-command-item:hover,
+.dark .slash-command-item.is-selected {
+  background-color: hsl(var(--accent)); /* Use accent for dark mode hover */
+}
+
+@media print {
+  body * {
+    visibility: hidden; /* Hide everything by default */
+  }
+  /* Ensure the main app container or a specific print root is visible if .tiptap-editor-wrapper is not a direct child of body */
+  /* For example, if your React app renders into #root: */
+  /* #root, #root * { visibility: visible; } */
+  /* Then refine from there: */
+  /* #root > *:not(.tiptap-editor-wrapper) { visibility: hidden; } */
+
+
+  .tiptap-editor-wrapper, .tiptap-editor-wrapper * { /* Make the editor wrapper and its content visible */
+    visibility: visible;
+  }
+  .tiptap-editor-wrapper { /* Position the editor content for printing */
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 20px; /* Add some padding for the print view */
+    box-sizing: border-box;
+    background-color: white !important; /* Ensure background is white for print */
+    color: black !important; /* Ensure text is black */
+  }
+  /* Hide elements that should not be in the PDF */
+  .bottom-toolbar-container,
+  .slash-command-popup {
+    display: none !important;
+  }
+
+  .ProseMirror {
+    min-height: unset !important;
+    padding: 0 !important;
+    color: black !important; /* Ensure ProseMirror content is black */
+  }
+
+  .ProseMirror p,
+  .ProseMirror h1,
+  .ProseMirror h2,
+  .ProseMirror h3,
+  .ProseMirror li { /* Add other elements as needed */
+    color: black !important; /* Ensure specific elements within ProseMirror are black */
+  }
+
+  /* Remove dark mode styles for printing */
+  .dark .tiptap-editor-wrapper,
+  .dark .ProseMirror,
+  .dark .ProseMirror p,
+  .dark .ProseMirror h1,
+  .dark .ProseMirror h2,
+  .dark .ProseMirror h3,
+  .dark .ProseMirror li {
+    background-color: white !important;
+    color: black !important;
+  }
+  .dark .slash-command-popup { /* Ensure it's hidden in dark mode print too */
+    display: none !important;
+  }
+}
